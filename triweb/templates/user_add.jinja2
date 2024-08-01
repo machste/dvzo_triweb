@@ -1,0 +1,82 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+<div class="container content">
+  <h1>Benutzer Hinzufügen</h1>
+  
+  <form novalidate name="user_add" method="post">
+    <div class="mb-2">
+      <label class="form-label" for="firstname">Vorname</label>
+      <input class="form-control{{ form.firstname.get_valid_cls() | prefix(' ') }}" id="firstname" name="firstname" value="{{ form.firstname.value }}" autocomplete="off"/>
+      <div class="invalid-feedback">{{ form.firstname.err_msg|default('') }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="lastname">Name</label>
+      <input class="form-control{{ form.lastname.get_valid_cls() | prefix(' ') }}" id="lastname" name="lastname" value="{{ form.lastname.value }}" autocomplete="off" />
+      <div class="invalid-feedback">{{ form.lastname.err_msg|default('') }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="email">E-Mail Adresse</label>
+      <input class="form-control{{ form.email.get_valid_cls() | prefix(' ') }}" id="email" type="email" name="email" value="{{ form.email.value }}" autocomplete="off" />
+      <div class="invalid-feedback">{{ form.email.err_msg|default('') }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="role" >Funktion</label>
+      <select class="form-select{{ form.email.get_valid_cls() | prefix(' ') }}" id="role" name="role">
+        {% for role, role_desc in user_roles.items() %}
+          <option {{ 'selected' if form.role.value == role }} value="{{ role }}">{{ role_desc }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="password1">Passwort</label>
+      <div class="input-group has-validation">
+        <input class="form-control{{ form.password1.get_valid_cls() | prefix(' ') }}" id="password1" type="password" name="password1" value="{{ form.password1.value }}" autocomplete="new-password" />
+        <div class="input-group-append">
+          <span class="input-group-text" id="toggle-pwd1-btn" onclick="toggle_pwd_input(1)">
+            <i class="bi-eye" id="eye-open1"></i>
+            <i class="bi-eye-slash d-none" id="eye-closed1"></i>
+          </span>
+        </div>
+        <div class="invalid-feedback">{{ form.password1.err_msg|default('') }}</div>
+      </div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="password2">Passwort (wiederholen)</label>
+      <div class="input-group  has-validation">
+        <input class="form-control{{ form.password2.get_valid_cls() | prefix(' ') }}" id="password2" type="password" name="password2"  value="{{ form.password2.value }}" autocomplete="new-password" />
+        <div class="input-group-append">
+          <span class="input-group-text" id="toggle-pwd2-btn" onclick="toggle_pwd_input(2)">
+            <i class="bi-eye" id="eye-open2"></i>
+            <i class="bi-eye-slash d-none" id="eye-closed2"></i>
+          </span>
+        </div>
+        <div class="invalid-feedback">{{ form.password2.err_msg|default('') }}</div>
+      </div>
+    </div>
+    <div class="mt-4">
+      <button class="btn btn-primary" type="submit" name="form.submitted" value="user_add">Speichern</button>
+      <a class="btn btn-secondary" href="{{ request.route_url('users') }}">Zurück</a>
+    </div>
+  </form>
+  <script>
+    function toggle_pwd_input(n=1) {
+      let password = document.getElementById(`password${n}`);
+      let eye_open = document.getElementById(`eye-open${n}`);
+      let eye_closed = document.getElementById(`eye-closed${n}`);
+
+      eye_closed.classList.remove("d-none");
+
+      if (password.type === "password") {
+        password.type = "text";
+        eye_open.style.display = "none";
+        eye_closed.style.display = "block";
+      } else {
+        password.type = "password";
+        eye_open.style.display = "block";
+        eye_closed.style.display = "none";
+      }
+    }
+  </script>
+</div>
+{% endblock content %}

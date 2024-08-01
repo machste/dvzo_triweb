@@ -1,0 +1,25 @@
+div.content {
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+}
+
+div.content h1 {
+    margin-bottom: 1.5rem;
+}
+
+i.alert-icon {
+    font-size: 32px;
+    margin-right: 1rem; 
+}
+
+img.social-icon {
+    width: 24px;
+}
+
+input[type="number"] {
+    text-align: end;
+}
+
+input[type="number"]::-webkit-inner-spin-button {
+    margin-left: 8px;
+}

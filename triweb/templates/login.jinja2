@@ -1,0 +1,70 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+<div class="mx-sm-auto mx-5 my-5" style="max-width: 480px;">
+  <h1>Willkommen</h1>
+  <p class="lead">... beim Ressort Triebfahrzeuge des DVZO!</p>
+  <form class="my-4" method="post">
+    <input type="hidden" name="came_from" value="{{ came_from }}" />
+    <div class="mb-3">
+      <label class="form-label" for="email">E-Mail Adresse</label>
+      <input class="form-control" id="email" type="email" name="email" value="{{ email }}" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="password">Password</label>
+      <div class="input-group">
+        <input class="form-control" id="password" type="password" name="password" />
+        <div class="input-group-append">
+          <span class="input-group-text" id="toggle-pwd-btn" onclick="toggle_pwd_input()">
+            <i class="bi-eye" id="eye-open"></i>
+            <i class="bi-eye-slash d-none" id="eye-closed"></i>
+          </span>
+        </div>
+      </div>
+      <div class="form-text">Hast du dein <a data-bs-toggle="collapse" href="#collapse-password" role="button">Passwort</a> vergessen?</div>
+        <div class="collapse" id="collapse-password">
+          <div class="card card-body">
+            Ja, heitere Beck numal! Da gits nur eis: Bim Chef aatrabe.
+          </div>
+        </div>
+    </div>
+    {% if message %}
+      <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ message }}
+      </div>
+    {% endif %}
+    <button class="btn btn-primary" type="submit" name="form.submitted" value="login">Anmelden</button>
+  </form>
+  <p>Noch nicht Mitglied? Dann melde ich doch
+    <a href="https://dvzo.ch/verein/mitgliedschaft/mitglied-werden/">hier.</a>
+  </p>
+
+  <figure class="my-5 border-top pt-2">
+    <blockquote class="blockquote fs-5">
+      <p><i>«Eine Dampflokomotive fährt immer,<br /> aber nicht immer ideal.»</i></p>
+    </blockquote>
+    <figcaption class="blockquote-footer text-end">
+      Heiner Vogel in <cite title="Quelle">Die Dampflokomotive</cite>
+    </figcaption>
+  </figure>
+</div>
+<script>
+  function toggle_pwd_input() {
+    var password = document.getElementById("password");
+    var eye_open = document.getElementById("eye-open");
+    var eye_closed = document.getElementById("eye-closed");
+
+    eye_closed.classList.remove("d-none");
+
+    if (password.type === "password") {
+      password.type = "text";
+      eye_open.style.display = "none";
+      eye_closed.style.display = "block";
+    } else {
+      password.type = "password";
+      eye_open.style.display = "block";
+      eye_closed.style.display = "none";
+    }
+  }
+</script>
+{% endblock content %}

@@ -1,0 +1,137 @@
+.col .card:not(:first-child) {
+  margin-top: 0.5rem;
+}
+
+.card.cal-month {
+  background: #bbbbbb;
+}
+
+.card.cal-month .card-body {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.card.cal-month .card-title {
+  font-size: 24px;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.card.cal-workday {
+  hyphens: auto;
+}
+
+.card.cal-workday .card-header {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.card.cal-workday .workday-datetime {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.card.cal-workday .workday-datetime .workday-date {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.card.cal-workday .card-body {
+  padding: 0.5rem;
+}
+
+.card.cal-workday .workday-badges {
+  margin-top: 0.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.card.cal-workday .badge {
+  font-size: 16px;
+  font-weight: bold;
+  padding: 0.25rem 0.75rem;
+  margin: 0.25rem 0.5rem 0.25rem 0;
+}
+
+.badge-workshop {
+  background-color: #3C78D8;
+}
+
+.badge-lok {
+  background-color: #c55c20;
+}
+
+.badge-lok.lok-godfather-1 {
+  background-color: #6AA84F;
+}
+
+.badge-lok.lok-godfather-2 {
+  background-color: #F1C232;
+}
+
+.badge-lok.lok-godfather-3 {
+  background-color: #A64D79;
+}
+
+.badge-lok.lok-godfather-4 {
+  background-color: #eb2b2b;
+}
+
+.badge-lok.lok-godfather-5 {
+  background-color: #2bc5eb;
+}
+
+.card.cal-workday .card-header .workday-cook:after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 3.5rem;
+  right: 0.5rem;
+  width: 32px;
+  height: 32px;
+  background: url(/static/imgs/cook-1x.png) no-repeat;
+  background-size: auto 32px;
+}
+
+.card.cal-workday .card-title {
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.card.cal-workday ul {
+  list-style: none;
+  padding-left: 16px;
+}
+
+.card.cal-workday li::before {
+  content: '•';
+  position: absolute;
+  margin-left: -12px;
+}
+
+.card.cal-workday :is(.card-title, p, ul):last-child {
+  margin-bottom: 0;
+}
+
+.card.cal-workday .btn-group-sm>.btn {
+  --bs-btn-font-size: 18px;
+}
+
+.card.cal-workday .workday-lead-icon {
+  font-size: 24px;
+}
+
+.card.cal-workday .card-footer {
+  padding: 0.5rem;
+}
+
+.card.cal-workday .workday-personnel {
+  padding-left: 28px;
+  text-indent: -10px;
+}
+
+.card.cal-workday .workday-personnel span {
+  white-space: nowrap;
+}

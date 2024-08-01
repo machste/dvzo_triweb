@@ -1,0 +1,114 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+<div class="container content">
+  <h1>Mein Profil</h1>
+  <form id="form" name="myaccount" method="post" novalidate>
+    <div class="mb-2">
+      <label class="form-label" for="firstname">Vorname</label>
+      <input class="form-control{{ form.firstname.get_valid_cls() | prefix(' ') }}" id="firstname" name="firstname" value="{{ form.firstname.value }}" autocomplete="off"/>
+      <div class="invalid-feedback">{{ form.firstname.err_msg }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="lastname">Name</label>
+      <input class="form-control{{ form.lastname.get_valid_cls() | prefix(' ')  }}" id="lastname" name="lastname" value="{{ form.lastname.value }}" autocomplete="off" />
+      <div class="invalid-feedback">{{ form.lastname.err_msg }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="nickname">Spitzname</label>
+      <input class="form-control{{ form.nickname.get_valid_cls() | prefix(' ')  }}" id="nickname" name="nickname" value="{{ form.nickname.value }}" autocomplete="off" />
+      <div class="invalid-feedback">{{ form.nickname.err_msg }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="email">E-Mail Adresse</label>
+      <input class="form-control{{ form.email.get_valid_cls() | prefix(' ')  }}" id="email" type="email" name="email" value="{{ form.email.value }}" autocomplete="off" />
+      <div class="invalid-feedback">{{ form.email.err_msg }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="password1">Passwort</label>
+      <div class="input-group has-validation">
+        <input class="form-control{{ form.password1.get_valid_cls() | prefix(' ')  }}" id="password1" type="password" name="password1" value="{{ form.password1.value }}" autocomplete="new-password" />
+        <div class="input-group-append">
+          <span class="input-group-text" id="toggle-pwd1-btn" onclick="toggle_pwd_input(1)">
+            <i class="bi-eye" id="eye-open1"></i>
+            <i class="bi-eye-slash d-none" id="eye-closed1"></i>
+          </span>
+        </div>
+        <div class="invalid-feedback">{{ form.password1.err_msg }}</div>
+      </div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="password2">Passwort (wiederholen)</label>
+      <div class="input-group  has-validation">
+        <input class="form-control{{ form.password2.get_valid_cls() | prefix(' ')  }}" id="password2" type="password" name="password2"  value="{{ form.password2.value }}" autocomplete="new-password" />
+        <div class="input-group-append">
+          <span class="input-group-text" id="toggle-pwd2-btn" onclick="toggle_pwd_input(2)">
+            <i class="bi-eye" id="eye-open2"></i>
+            <i class="bi-eye-slash d-none" id="eye-closed2"></i>
+          </span>
+        </div>
+        <div class="invalid-feedback">{{ form.password2.err_msg }}</div>
+      </div>
+    </div>
+    <div class="mt-4">
+      <button class="btn btn-primary" type="submit" id="form-save-btn" name="myaccount.submitted" value="form" disabled>Speichern</button>
+      {% if form.validated %}
+        <a class="btn btn-secondary" href="{{ request.url }}">Verwerfen</a>
+      {% else %}
+        <button class="btn btn-secondary" type="reset" id="form-reset-btn" disabled>Zurücksetzen</button>
+      {% endif %}
+    </div>
+  </form>
+</div>
+<script>
+  const form = document.getElementById("form");
+  const form_inputs = document.querySelectorAll("#form input");
+  const form_save_btn = document.getElementById("form-save-btn");
+  const form_reset_btn = document.getElementById("form-reset-btn");
+
+  function toggle_pwd_input(n=1) {
+    let password = document.getElementById(`password${n}`);
+    let eye_open = document.getElementById(`eye-open${n}`);
+    let eye_closed = document.getElementById(`eye-closed${n}`);
+
+    eye_closed.classList.remove("d-none");
+
+    if (password.type === "password") {
+      password.type = "text";
+      eye_open.style.display = "none";
+      eye_closed.style.display = "block";
+    } else {
+      password.type = "password";
+      eye_open.style.display = "block";
+      eye_closed.style.display = "none";
+    }
+  }
+
+  function save_original_values() {
+    for (const el of form_inputs) {
+      el.orig_value = el.value;
+    }
+  }
+
+  function disable_form_buttons(state=true) {
+    form_save_btn.disabled = state;
+    form_reset_btn.disabled = state;
+  }
+
+
+  function update_form_buttons() {
+    let orig_state = true;
+    for (const el of form_inputs) {
+      if (el.orig_value !== el.value) {
+        orig_state = false;
+        break;
+      }
+    }
+    disable_form_buttons(orig_state);
+  }
+
+  save_original_values();
+  form.addEventListener("input", update_form_buttons);
+  form.addEventListener("reset", disable_form_buttons);
+</script>
+{% endblock content %}

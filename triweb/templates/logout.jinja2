@@ -1,0 +1,12 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+<div class="container content">
+  <h1>Ciao{{ nickname | prefix(' ') }}!</h1>
+  <p class="lead">
+    Wir freuen uns, dich bald wieder auf der Webseite des
+    <a href="{{ request.route_url('home') }}">Ressorts Triebfahrzeuge</a> des
+    DVZO begrüssen zu dürfen, bis bald.
+  </p>
+</div>
+{% endblock content %}

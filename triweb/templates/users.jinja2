@@ -1,0 +1,43 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+<div class="container content">
+  <h1>Benutzer Verwalten</h1>
+  {% if users|count > 0 %}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <caption>Liste aller Benutzer</caption>
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Vorname</th>
+            <th scope="col">Name</th>
+            <th scope="col">E-Mail Adresse</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+            <tr>
+              <th scope="row">{{ loop.index }}</th>
+              <td>{{ user.firstname }}</td>
+              <td>{{ user.lastname }}</td>
+              <td>{{ user.email }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-warning d-flex align-items-center my-4" role="alert">
+      <i class="bi bi-exclamation-triangle-fill flex-shrink-0 alert-icon"></i>
+      <div>
+        Es wurden keine Benutzer gefunden!
+      </div>
+    </div>
+  {% endif %}
+  {% if request.has_permission('administrate') %}
+    <a class="btn btn-primary" href="{{ request.route_url('user_add') }}">Benutzer hinzufügen</a>
+  {% endif %}
+</div>
+
+{% endblock content %}

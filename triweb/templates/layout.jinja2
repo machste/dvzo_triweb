@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="{{ request.locale_name }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title | default('DVZO - Triebfahrzeuge') }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{{ request.static_url('triweb:static/css/default.css') }}">
+  <link rel="icon" type="image/png" href="{{ request.static_url('triweb:static/imgs/favicon.png') }}">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  <!--<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>-->
+  <script src="{{ request.static_url('triweb:static/js/main.js') }}"></script>
+</head>
+<body>
+  <div class="container-fluid px-0">
+    <img class="w-100" srcset="{{ request.static_url('triweb:static/imgs/header-4x.jpg') }} 4000w, {{ request.static_url('triweb:static/imgs/header-3x.jpg') }} 3000w, {{ request.static_url('triweb:static/imgs/header-2x.jpg') }} 2000w, {{ request.static_url('triweb:static/imgs/header-1x.jpg') }} 1000w," src="{{ request.static_url('triweb:static/imgs/header.jpg') }}">
+  </div>
+  <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex" href="{{ request.route_url('home') }}" style="font-size: 32px;">
+        <img class="d-none d-sm-block" height="56" src="{{ request.static_url('triweb:static/imgs/dvzo_logo.png') }}" alt="DVZO" />
+        <span class="ms-sm-2">Triebfahrzeuge</span>
+      </a>
+      {% if request.identity is not none %}
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-main-menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbar-main-menu">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" id="overview" href="{{ request.route_url('overview') }}">Übersicht</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="issues" href="{{ request.route_url('issues') }}">Arbeiten</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="calendar" href="{{ request.route_url('calendar') }}">Werkstattkalender</a>
+            </li>
+            {% if request.has_permission('administrate') %}
+              <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" id="admin" href="#" role="button" data-bs-toggle="dropdown">
+                  Admin
+                  </a>
+                  <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="{{ request.route_url('users') }}">Benutzer</a></li>
+                  <li><a class="dropdown-item" href="{{ request.route_url('workdays') }}">Arbeitstage</a></li>
+                  </ul>
+              </li>
+            {% endif %}
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item dropdown">
+              <a class="nav-link text-nowrap dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="bi-person me-1"></i>{{ request.identity.display_name }}
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ request.route_url('myaccount') }}">Mein Profil</a></li>
+                <li><a class="dropdown-item" href="{{ request.route_url('settings') }}">Einstellungen</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{ request.route_url('logout') }}">Abmelden</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      {% endif %}
+    </div>
+  </nav>
+  {% if request.session.has_toasts() %}
+    <div class="position-relative">
+      <div class="toast-container position-absolute top-0 end-0 p-3">
+        {% for toast in request.session.pop_toasts() %}
+          <div class="toast show" role="alert">
+            <div class="toast-header">
+              {{ toast.icon | safe }}
+              <strong class="{{ 'ms-2 ' if toast.has_icon() }}me-auto">{{ toast.title | default('CashFlow')}}</strong>
+              <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+              {{ toast.message }}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% block content %}
+    <p>No content</p>
+  {% endblock content %}
+
+  <div class="container">
+    <footer class="row py-2 border-top">
+      <div class="col-md-8 text-center text-md-start text-body-secondary">
+        <a href="https://www.dvzo.ch" class="mb-3 mb-md-0 text-body-secondary text-decoration-none">DVZO - Dampfbahnverein Zürcher Oberland</a>,
+        Version&nbsp;{{ request.context.APP_VERSION }}
+      </div>
+      <ul class="nav col-md-4 justify-content-center justify-content-md-end">
+        <li class="ms-3">
+          <a class="text-body-secondary" href="https://www.facebook.com/pg/Dampfbahn-Verein-Z%C3%BCrcher-Oberland-DVZO-294298207308477">
+            <img class="social-icon" src="{{ request.static_url('triweb:static/imgs/facebook.png') }}" alt="Facebook" />
+          </a>
+        </li>
+        <li class="ms-3">
+          <a class="text-body-secondary" href="https://www.instagram.com/dvzo.ch">
+            <img class="social-icon" src="{{ request.static_url('triweb:static/imgs/instagram.png') }}" alt="Instagram" />
+          </a>
+        </li>
+        <li class="ms-3">
+          <a class="text-body-secondary" href="https://www.linkedin.com/company/dampfbahn-verein-z%C3%BCrcher-oberland-dvzo/">
+            <img class="social-icon" src="{{ request.static_url('triweb:static/imgs/linkedin.png') }}" alt="LinkedIn" />
+          </a>
+        </li>
+        <li class="ms-3">
+          <a class="text-body-secondary" href="https://www.youtube.com/channel/UC1Xwp0MZoVYkSlfzh8VsZ6g">
+            <img class="social-icon" src="{{ request.static_url('triweb:static/imgs/youtube.png') }}" alt="YouTube" />
+          </a>
+        </li>
+      </ul>
+    </footer>
+  </div>
+</body>
+</html>
