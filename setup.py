@@ -21,6 +21,7 @@ requires = [
     'SQLAlchemy',
     'transaction',
     'zope.sqlalchemy',
+    'requests',
 ]
 
 tests_require = [
@@ -31,7 +32,7 @@ tests_require = [
 
 setup(
     name='triweb',
-    version='0.3',
+    version='0.4',
     description='Webseite für das Ressort Triebfahrzeuge des DVZO',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[

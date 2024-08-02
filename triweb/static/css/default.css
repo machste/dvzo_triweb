@@ -1,25 +1,76 @@
 div.content {
-    margin-top: 3rem;
-    margin-bottom: 3rem;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
 }
 
 div.content h1 {
-    margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
-i.alert-icon {
-    font-size: 32px;
-    margin-right: 1rem; 
+div.content h2 {
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
 }
 
-img.social-icon {
-    width: 24px;
+div.content h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 input[type="number"] {
-    text-align: end;
+  text-align: end;
 }
 
 input[type="number"]::-webkit-inner-spin-button {
-    margin-left: 8px;
+  margin-left: 8px;
+}
+
+i.icon::before, [class^="icon-"]::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-size: 20px;
+  background-repeat: no-repeat;
+}
+
+i.icon-type-crit:before {
+  background-image: url(/static/imgs/type-crit.png);
+}
+
+i.icon-type-task:before {
+  background-image: url(/static/imgs/type-task.png);
+}
+
+i.icon-type-lack:before {
+  background-image: url(/static/imgs/type-lack.png);
+}
+
+i.icon-prio-highest:before {
+  background-image: url(/static/imgs/prio-highest.svg);
+}
+
+i.icon-prio-high:before {
+  background-image: url(/static/imgs/prio-high.svg);
+}
+
+i.icon-prio-medium:before {
+  background-image: url(/static/imgs/prio-medium.svg);
+}
+
+i.icon-prio-low:before {
+  background-image: url(/static/imgs/prio-low.svg);
+}
+
+i.icon-prio-lowest:before {
+  background-image: url(/static/imgs/prio-lowest.svg);
+}
+
+div.alert i.alert-icon {
+  font-size: 32px;
+  margin-right: 1rem; 
+}
+
+footer img.social-icon {
+  width: 24px;
 }

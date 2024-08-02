@@ -3,5 +3,121 @@
 {% block content %}
 <div class="container content">
   <h1>Arbeiten</h1>
+
+  <h2>Fertige Arbeiten</h2>
+
+  <p>Die hier gelisteten Arbeiten wurden in den vergangenen 4 Wochen fertiggestellt.</p>
+
+  {% if done | count > 0 %}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">Art</th>
+            <th scope="col">Triebfahrzeug</th>
+            <th scope="col">Beschreibung</th>
+            <th scope="col">Mitarbeiter</th>
+            <th scope="col">Erstellt am</th>
+            <th scope="col">Erledigt am</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for issue in done %}
+            <tr>
+              <td>{{ issue.type_icon | safe }}</td>
+              <td>{{ issue.engine }}</td>
+              <td>{{ issue.summary }}</td>
+              <td>{{ issue.workers }}</td>
+              <td>{{ issue.created.strftime("%d. %b %Y") if issue.created else "" }}</td>
+              <td>{{ issue.resolved.strftime("%d. %b %Y") if issue.resolved else "" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-warning d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill flex-shrink-0 alert-icon"></i>
+      <div>
+        Im Moment gibt es keine laufenden Arbeiten.
+      </div>
+    </div>
+  {% endif %}
+
+  <h2>Laufende Arbeiten</h2>
+
+  {% if doing | count > 0 %}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">Art</th>
+            <th scope="col">Triebfahrzeug</th>
+            <th scope="col">Beschreibung</th>
+            <th scope="col">Mitarbeiter</th>
+            <th scope="col">Priorität</th>
+            <th scope="col">Fälligkeitstag</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for issue in doing %}
+            <tr>
+              <td>{{ issue.type_icon | safe }}</td>
+              <td>{{ issue.engine }}</td>
+              <td>{{ issue.summary }}</td>
+              <td>{{ issue.workers }}</td>
+              <td>{{ issue.priority_icon | safe }}</td>
+              <td>{{ issue.duedate.strftime("%d. %b %Y") if issue.duedate else "" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-warning d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill flex-shrink-0 alert-icon"></i>
+      <div>
+        Im Moment gibt es keine laufenden Arbeiten.
+      </div>
+    </div>
+  {% endif %}
+
+  <h2>Offene Arbeiten</h2>
+
+  <h3>Ed 3/3 401 "Bauma"</h3>
+  {% if lok401 | count > 0 %}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">Art</th>
+            <th scope="col">Beschreibung</th>
+            <th scope="col">Priorität</th>
+            <th scope="col">Erstellt am</th>
+            <th scope="col">Fälligkeitstag</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for issue in lok401 %}
+            <tr>
+              <td>{{ issue.type_icon | safe }}</td>
+              <td>{{ issue.summary }}</td>
+              <td>{{ issue.priority_icon | safe }}</td>
+              <td>{{ issue.created.strftime("%d. %b %Y") if issue.created else "" }}</td>
+              <td>{{ issue.duedate.strftime("%d. %b %Y") if issue.duedate else "" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-warning d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill flex-shrink-0 alert-icon"></i>
+      <div>
+        Im Moment gibt es keine laufenden Arbeiten.
+      </div>
+    </div>
+  {% endif %}
+
 </div>
 {% endblock content %}
