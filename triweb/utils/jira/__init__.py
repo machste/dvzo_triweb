@@ -42,7 +42,8 @@ class Jira(object):
         res = requests.request('GET', url=url, auth=self.auth,
                 headers=self.headers)
         if not res.ok:
-            raise self.Error("Request '{url}' failed!")
+            _log.error(f"Request '{url}' failed!")
+            raise self.Error(f"Anfrage bei '{self.url}' hat fehlgeschlagen!")
         return res.json()
 
     def get_issues(self, list_name, max_age=None):
@@ -71,7 +72,8 @@ class Jira(object):
 
 
     class Error(GeneralError):
-        pass
+        
+        TOPIC = 'Jira API'
 
 
 class IssueCache(object):

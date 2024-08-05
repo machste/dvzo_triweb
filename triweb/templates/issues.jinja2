@@ -5,10 +5,8 @@
   <h1>Arbeiten</h1>
 
   <h2>Fertige Arbeiten</h2>
-
-  <p>Die hier gelisteten Arbeiten wurden in den vergangenen 4 Wochen fertiggestellt.</p>
-
   {% if done | count > 0 %}
+    <p>Die hier gelisteten Arbeiten wurden in den vergangenen 4 Wochen fertiggestellt.</p>
     <div class="table-responsive">
       <table class="table table-hover">
         <thead>
@@ -39,7 +37,7 @@
     <div class="alert alert-warning d-flex align-items-center" role="alert">
       <i class="bi bi-exclamation-triangle-fill flex-shrink-0 alert-icon"></i>
       <div>
-        Im Moment gibt es keine laufenden Arbeiten.
+        Kürzlich wurden keine Arbeiten fertiggestellt.
       </div>
     </div>
   {% endif %}
@@ -112,8 +110,8 @@
         </table>
       </div>
     {% else %}
-      <div class="alert alert-warning d-flex align-items-center" role="alert">
-        <i class="bi bi-exclamation-triangle-fill flex-shrink-0 alert-icon"></i>
+      <div class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="bi bi-check-circle-fill flex-shrink-0 alert-icon"></i>
         <div>
           Im Moment gibt es keine Arbeiten für dieses Triebfahrzeug.
         </div>
