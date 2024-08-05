@@ -18,6 +18,9 @@ class Jira(object):
         'lok9.open': 10010,
         'lok18.open': 10015,
         'lok401.open': 10011,
+        'ee33.open': 10016,
+        'tmiii.open': 10018,
+        'temiii.open': 10017,
         'doing': 10023,
         'done': 10028
     }
