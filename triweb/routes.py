@@ -26,3 +26,4 @@ def includeme(config):
     config.add_route('settings', '/settings')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
+    config.add_route('rest.issues', '/rest/issues/{list_name}')

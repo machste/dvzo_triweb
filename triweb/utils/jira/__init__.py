@@ -47,8 +47,13 @@ class Jira(object):
         return res.json()
 
     def get_issues(self, list_name, max_age=None):
-        # Check the issue cache first
-        issues = None
+        # Check list name
+        try:
+            filter_id = self.FILTERS[list_name]
+        except:
+            _log.error(f"Issue list '{list_name}' does not exist!")
+            return None
+        # Check the issue cache
         if self.issue_cache is not None:
             issues = self.issue_cache.get_issues(list_name, max_age)
         if issues is not None:
@@ -56,13 +61,12 @@ class Jira(object):
             return issues
         # Otherwise get the issues from Jira
         issues = []
-        filter_id = self.FILTERS[list_name]
         path = f'/rest/api/3/search?&fields=issuetype,status,priority,summary,created,duedate,resolutiondate,customfield_10058,customfield_10069&jql=filter%3D{filter_id}'
         js = self.request(path)
         js_issues = js['issues']
         _log.info(f"Get issues '{list_name}' (id: {filter_id}) ...")
         for js_issue in js_issues:
-            issue = Issue.from_js(js_issue)
+            issue = Issue.from_jira_js(js_issue)
             issues.append(issue)
             _log.debug(f'Got issue {issue}')
         # Update issue cache

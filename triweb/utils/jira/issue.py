@@ -15,6 +15,9 @@ class EnumValue(object):
             return f'<i class="icon icon-{self.icon_name}"></i>'
         return f'<i>{self.name}</i>'
 
+    def __json__(self, request=None):
+        return dict(name=self.name, icon=self.icon)
+
     def __repr__(self):
         return str(self.id)
 
@@ -98,15 +101,15 @@ class Issue(object):
 
     @property
     def created(self):
-        return self._created
+        return self.parse_date(self._created)
 
     @property
     def duedate(self):
-        return self._duedate
+        return self.parse_date(self._duedate)
 
     @property
     def resolved(self):
-        return self._resolved
+        return self.parse_date(self._resolved)
 
     @property
     def workers(self):
@@ -131,7 +134,7 @@ class Issue(object):
             return None
 
     @staticmethod
-    def from_js(js):
+    def from_jira_js(js):
         self = Issue(js['id'], js['key'])
         fields = js["fields"]
         if 'summary' in fields:
@@ -164,11 +167,11 @@ class Issue(object):
             except:
                 pass
         if 'created' in fields:
-            self._created = self.parse_date(fields['created'])
+            self._created = fields['created']
         if 'duedate' in fields:
-            self._duedate = self.parse_date(fields['duedate'])
+            self._duedate = fields['duedate']
         if 'resolutiondate' in fields:
-            self._resolved = self.parse_date(fields['resolutiondate'])
+            self._resolved = fields['resolutiondate']
         if 'customfield_10058' in fields:
             try:
                 engine_id = int(fields['customfield_10058']['id'])
@@ -181,6 +184,13 @@ class Issue(object):
         if 'customfield_10069' in fields:
             self._workers = fields.get('customfield_10069', "")
         return self
+
+    def __json__(self, request=None):
+        return dict(id=self.id, key=self.key, type=self._type.value,
+                priority=self._priority.value, status=self.status,
+                engine=self.engine, created=self._created,
+                duedate=self._duedate,
+                resolved=self._resolved, summary=self.summary)
 
     def __str__(self):
         return f'{self.key}: {self._summary}'
