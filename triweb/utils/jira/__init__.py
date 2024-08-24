@@ -87,7 +87,7 @@ class IssueCache(object):
         self.data = {}
 
     def get_issues(self, name, max_age=None):
-        max_age = max_age or self.max_age
+        max_age = max_age if max_age is not None else self.max_age
         d = self.data.get(name, None)
         if d is None:
             return None
