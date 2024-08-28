@@ -22,6 +22,25 @@ class EnumValue(object):
         return str(self.id)
 
 
+class Worker(object):
+
+    def __init__(self, jira_name):
+        self.id = None
+        self.jira_name = jira_name
+        self.firstname = None
+        self.lastname = None
+
+    @property
+    def short_name(self):
+        return self.jira_name
+
+    def __json__(self, request=None):
+        return dict(id=self.id, short_name=self.short_name)
+
+    def __repr__(self):
+        return self.short_name
+
+
 class Issue(object):
 
     class Type(Enum):
@@ -70,7 +89,7 @@ class Issue(object):
         self._status = Issue.Status.DEFAULT
         self._engine = Issue.Engine.DEFAULT
         self._summary = '(Kein Titel)'
-        self._workers = None
+        self.workers = []
         self._created = None
         self._duedate = None
         self._resolved = None
@@ -110,10 +129,6 @@ class Issue(object):
     @property
     def resolved(self):
         return self.parse_date(self._resolved)
-
-    @property
-    def workers(self):
-        return self._workers or ''
 
     @property
     def summary(self):
@@ -182,15 +197,23 @@ class Issue(object):
             except:
                 pass
         if 'customfield_10069' in fields:
-            self._workers = fields.get('customfield_10069', "")
+            self.workers = []
+            jira_worker_names = fields.get('customfield_10069')
+            if jira_worker_names is not None:
+                worker_names = jira_worker_names.split(',')
+                for worker_name in worker_names:
+                    worker_name = worker_name.strip()
+                    if len(worker_name) == 0:
+                        continue
+                    self.workers.append(Worker(worker_name))
         return self
 
     def __json__(self, request=None):
         return dict(id=self.id, key=self.key, type=self._type.value,
                 priority=self._priority.value, status=self.status,
                 engine=self.engine, created=self._created,
-                duedate=self._duedate,
-                resolved=self._resolved, summary=self.summary)
+                duedate=self._duedate, resolved=self._resolved,
+                workers=self.workers, summary=self.summary)
 
     def __str__(self):
         return f'{self.key}: {self._summary}'

@@ -21,6 +21,7 @@ class Jira(object):
         'ee33.open': 10016,
         'tmiii.open': 10018,
         'temiii.open': 10017,
+        'general.open': 10027,
         'doing': 10023,
         'done': 10028
     }

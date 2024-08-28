@@ -1,122 +1,225 @@
 {% extends "layout.jinja2" %}
 
+{% block head %}
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+{% endblock head %}
+
 {% block content %}
 <div class="container content">
   <h1>Arbeiten</h1>
 
   <h2>Fertige Arbeiten</h2>
-  {% if done | count > 0 %}
-    <p>Die hier gelisteten Arbeiten wurden in den vergangenen 4 Wochen fertiggestellt.</p>
-    <div class="table-responsive">
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th scope="col">Art</th>
-            <th scope="col">Triebfahrzeug</th>
-            <th scope="col">Beschreibung</th>
-            <th scope="col">Mitarbeiter</th>
-            <th scope="col">Erstellt am</th>
-            <th scope="col">Erledigt am</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for issue in done %}
-            <tr>
-              <td>{{ issue.type_icon | safe }}</td>
-              <td>{{ issue.engine }}</td>
-              <td>{{ issue.summary }}</td>
-              <td>{{ issue.workers }}</td>
-              <td>{{ issue.created.strftime("%d. %b %Y") if issue.created else "" }}</td>
-              <td>{{ issue.resolved.strftime("%d. %b %Y") if issue.resolved else "" }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  {% else %}
-    <div class="alert alert-warning d-flex align-items-center" role="alert">
-      <i class="bi bi-exclamation-triangle-fill flex-shrink-0 alert-icon"></i>
-      <div>
-        Kürzlich wurden keine Arbeiten fertiggestellt.
-      </div>
-    </div>
-  {% endif %}
 
-  <h2>Laufende Arbeiten</h2>
-
-  {% if doing | count > 0 %}
-    <div class="table-responsive">
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th scope="col">Art</th>
-            <th scope="col">Triebfahrzeug</th>
-            <th scope="col">Beschreibung</th>
-            <th scope="col">Mitarbeiter</th>
-            <th scope="col">Priorität</th>
-            <th scope="col">Fälligkeitstag</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for issue in doing %}
-            <tr>
-              <td>{{ issue.type_icon | safe }}</td>
-              <td>{{ issue.engine }}</td>
-              <td>{{ issue.summary }}</td>
-              <td>{{ issue.workers }}</td>
-              <td>{{ issue.priority_icon | safe }}</td>
-              <td>{{ issue.duedate.strftime("%d. %b %Y") if issue.duedate else "" }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <div id="app-done">
+    <div v-if="issues === null" class="d-flex align-items-center">
+      <div class="spinner-border mx-3"></div>
+      <p role="status">Loading ...</p>
     </div>
-  {% else %}
-    <div class="alert alert-warning d-flex align-items-center" role="alert">
-      <i class="bi bi-exclamation-triangle-fill flex-shrink-0 alert-icon"></i>
-      <div>
-        Im Moment gibt es keine laufenden Arbeiten.
-      </div>
-    </div>
-  {% endif %}
-
-  <h2>Offene Arbeiten</h2>
-
-  {% for lok_name, issues in open_per_engine.items() %}
-    <h3>{{ lok_name }}</h3>
-    {% if issues | count > 0 %}
+    <div v-else-if="issues.length > 0">
+      <p>Die hier gelisteten Arbeiten wurden in den vergangenen 4 Wochen fertiggestellt.</p>
       <div class="table-responsive">
         <table class="table table-hover">
           <thead>
             <tr>
               <th scope="col">Art</th>
+              <th scope="col">Triebfahrzeug</th>
               <th scope="col">Beschreibung</th>
-              <th scope="col">Priorität</th>
+              <th scope="col">Mitarbeiter</th>
               <th scope="col">Erstellt am</th>
+              <th scope="col">Erledigt am</th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr v-for="issue in issues">
+                <td v-html="issue.type.icon"></td>
+                <td>{[ issue.engine ]}</td>
+                <td>{[ issue.summary ]}</td>
+                <td>
+                  <span v-for="(worker, i) in issue.workers" class="text-nowrap">{[ worker.short_name ]}<span v-if="i < issue.workers.length - 1">, </span></span>
+                </td>
+                <td>{[ to_date_string(issue.created) ]}</td>
+                <td>{[ to_date_string(issue.resolved) ]}</td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div v-else class="alert alert-warning d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill flex-shrink-0 alert-icon"></i>
+      <div>
+        In den vergangenen 4 Wochen wurden keine Arbeiten fertiggestellt.
+      </div>
+    </div>
+  </div>
+  <script>
+    const app_done = Vue.createApp({
+      data() {
+        return { issues: null };
+      },
+      created() {
+        this.fetch_issues();
+      },
+      methods: {
+        async fetch_issues() {
+          const response = await fetch("rest/issues/done");
+          if (response.ok) {
+            let data = await response.json();
+            if ("issues" in data) {
+              this.issues = data.issues;
+              return;
+            }
+          }
+          this.issues = [];
+        },
+        to_date_string(date) {
+          return to_date_string(date);
+        }
+      },
+      delimiters: ["{[", "]}"],
+    })
+    app_done.mount("#app-done")
+  </script>
+
+  <h2>Laufende Arbeiten</h2>
+
+  <div id="app-doing">
+    <div v-if="issues === null" class="d-flex align-items-center">
+      <div class="spinner-border mx-3"></div>
+      <span role="status">Loading ...</span>
+    </div>
+    <div v-else-if="issues.length > 0">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Art</th>
+              <th scope="col">Triebfahrzeug</th>
+              <th scope="col">Beschreibung</th>
+              <th scope="col">Mitarbeiter</th>
+              <th scope="col">Priorität</th>
               <th scope="col">Fälligkeitstag</th>
             </tr>
           </thead>
           <tbody>
-            {% for issue in issues %}
-              <tr>
-                <td>{{ issue.type_icon | safe }}</td>
-                <td>{{ issue.summary }}</td>
-                <td>{{ issue.priority_icon | safe }}</td>
-                <td>{{ issue.created.strftime("%d. %b %Y") if issue.created else "" }}</td>
-                <td>{{ issue.duedate.strftime("%d. %b %Y") if issue.duedate else "" }}</td>
+              <tr v-for="issue in issues">
+                <td v-html="issue.type.icon"></td>
+                <td>{[ issue.engine ]}</td>
+                <td>{[ issue.summary ]}</td>
+                <td>
+                  <span v-for="(worker, i) in issue.workers" class="text-nowrap">{[ worker.short_name ]}<span v-if="i < issue.workers.length - 1">, </span></span>
+                </td>
+                <td v-html="issue.priority.icon"></td>
+                <td>{[ to_date_string(issue.duedate) ]}</td>
               </tr>
-            {% endfor %}
           </tbody>
         </table>
       </div>
-    {% else %}
-      <div class="alert alert-success d-flex align-items-center" role="alert">
-        <i class="bi bi-check-circle-fill flex-shrink-0 alert-icon"></i>
-        <div>
-          Im Moment gibt es keine Arbeiten für dieses Triebfahrzeug.
+    </div>
+    <div v-else class="alert alert-warning d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill flex-shrink-0 alert-icon"></i>
+      <div>
+        Im Moment gibt es keine laufenden Arbeiten.
+      </div>
+    </div>
+  </div>
+  <script>
+    const app_doing = Vue.createApp({
+      data() {
+        return { issues: null };
+      },
+      created() {
+        this.fetch_issues();
+      },
+      methods: {
+        async fetch_issues() {
+          const response = await fetch("rest/issues/doing");
+          if (response.ok) {
+            let data = await response.json();
+            if ("issues" in data) {
+              this.issues = data.issues;
+              return;
+            }
+          }
+          this.issues = [];
+        },
+        to_date_string(date) {
+          return to_date_string(date);
+        }
+      },
+      delimiters: ["{[", "]}"],
+    })
+    app_doing.mount("#app-doing")
+  </script>
+
+  <h2>Offene Arbeiten</h2>
+
+  {% for list_title, list_name in open_issue_lists.items() %}
+    <h3>{{ list_title }}</h3>
+
+    <div id="app-open-{{ loop.index }}">
+      <div v-if="issues === null" class="d-flex align-items-center">
+        <div class="spinner-border mx-3"></div>
+        <span role="status">Loading ...</span>
+      </div>
+      <div v-else-if="issues.length > 0">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Art</th>
+                <th scope="col">Beschreibung</th>
+                <th scope="col">Priorität</th>
+                <th scope="col">Erstellt am</th>
+                <th scope="col">Fälligkeitstag</th>
+              </tr>
+            </thead>
+            <tbody>
+                <tr v-for="issue in issues">
+                  <td v-html="issue.type.icon"></td>
+                  <td>{[ issue.summary ]}</td>
+                  <td v-html="issue.priority.icon"></td>
+                  <td>{[ to_date_string(issue.created) ]}</td>
+                  <td>{[ to_date_string(issue.duedate) ]}</td>
+                </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-    {% endif %}
+      <div v-else class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="bi bi-check-circle-fill flex-shrink-0 alert-icon"></i>
+        <div>
+          Im Moment gibt es keine offenen Arbeiten für diese Kategorie.
+        </div>
+      </div>
+    </div>
+    <script>
+      const app_open_{{ loop.index }} = Vue.createApp({
+        data() {
+          return { issues: null };
+        },
+        created() {
+          this.fetch_issues();
+        },
+        methods: {
+          async fetch_issues() {
+            const response = await fetch("rest/issues/{{ list_name }}");
+            if (response.ok) {
+              let data = await response.json();
+              if ("issues" in data) {
+                this.issues = data.issues;
+                return;
+              }
+            }
+            this.issues = [];
+          },
+          to_date_string(date) {
+            return to_date_string(date);
+          }
+        },
+        delimiters: ["{[", "]}"],
+      })
+      app_open_{{ loop.index }}.mount("#app-open-{{ loop.index }}")
+    </script>
   {% endfor %}
 </div>
 {% endblock content %}
