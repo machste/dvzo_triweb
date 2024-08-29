@@ -23,7 +23,7 @@
             <tr>
               <th scope="col">Art</th>
               <th scope="col">Triebfahrzeug</th>
-              <th scope="col">Beschreibung</th>
+              <th scope="col" style="min-width:320px">Beschreibung</th>
               <th scope="col">Mitarbeiter</th>
               <th scope="col">Erstellt am</th>
               <th scope="col">Erledigt am</th>
@@ -32,13 +32,13 @@
           <tbody>
               <tr v-for="issue in issues">
                 <td v-html="issue.type.icon"></td>
-                <td>{[ issue.engine ]}</td>
+                <td class="text-nowrap">{[ issue.engine ]}</td>
                 <td>{[ issue.summary ]}</td>
                 <td>
-                  <span v-for="(worker, i) in issue.workers" class="text-nowrap">{[ worker.short_name ]}<span v-if="i < issue.workers.length - 1">, </span></span>
+                  <span v-for="(worker, i) in issue.workers"><span class="text-nowrap">{[ worker.short_name ]}</span><span v-if="i < issue.workers.length - 1">, </span></span>
                 </td>
-                <td>{[ to_date_string(issue.created) ]}</td>
-                <td>{[ to_date_string(issue.resolved) ]}</td>
+                <td class="text-nowrap">{[ to_date_string(issue.created) ]}</td>
+                <td class="text-nowrap">{[ to_date_string(issue.resolved) ]}</td>
               </tr>
           </tbody>
         </table>
@@ -94,7 +94,7 @@
             <tr>
               <th scope="col">Art</th>
               <th scope="col">Triebfahrzeug</th>
-              <th scope="col">Beschreibung</th>
+              <th scope="col" style="min-width:320px">Beschreibung</th>
               <th scope="col">Mitarbeiter</th>
               <th scope="col">Priorität</th>
               <th scope="col">Fälligkeitstag</th>
@@ -103,13 +103,13 @@
           <tbody>
               <tr v-for="issue in issues">
                 <td v-html="issue.type.icon"></td>
-                <td>{[ issue.engine ]}</td>
+                <td class="text-nowrap">{[ issue.engine ]}</td>
                 <td>{[ issue.summary ]}</td>
                 <td>
-                  <span v-for="(worker, i) in issue.workers" class="text-nowrap">{[ worker.short_name ]}<span v-if="i < issue.workers.length - 1">, </span></span>
+                  <span v-for="(worker, i) in issue.workers"><span class="text-nowrap">{[ worker.short_name ]}</span><span v-if="i < issue.workers.length - 1">, </span></span>
                 </td>
                 <td v-html="issue.priority.icon"></td>
-                <td>{[ to_date_string(issue.duedate) ]}</td>
+                <td class="text-nowrap">{[ to_date_string(issue.duedate) ]}</td>
               </tr>
           </tbody>
         </table>
@@ -167,7 +167,7 @@
             <thead>
               <tr>
                 <th scope="col">Art</th>
-                <th scope="col">Beschreibung</th>
+                <th scope="col" style="min-width:320px">Beschreibung</th>
                 <th scope="col">Priorität</th>
                 <th scope="col">Erstellt am</th>
                 <th scope="col">Fälligkeitstag</th>
@@ -178,8 +178,8 @@
                   <td v-html="issue.type.icon"></td>
                   <td>{[ issue.summary ]}</td>
                   <td v-html="issue.priority.icon"></td>
-                  <td>{[ to_date_string(issue.created) ]}</td>
-                  <td>{[ to_date_string(issue.duedate) ]}</td>
+                  <td class="text-nowrap">{[ to_date_string(issue.created) ]}</td>
+                  <td class="text-nowrap">{[ to_date_string(issue.duedate) ]}</td>
                 </tr>
             </tbody>
           </table>
