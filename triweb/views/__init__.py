@@ -9,3 +9,4 @@ class View(object):
             raise HTTPFound(location=request.route_url('login'))
         self.request = request
         self.dbsession = request.dbsession
+        self.push_toast = self.request.session.push_toast

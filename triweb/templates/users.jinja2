@@ -17,7 +17,7 @@
         </thead>
         <tbody>
           {% for user in users %}
-            <tr>
+            <tr {% if request.has_permission('administrate') %}onclick="window.location='{{ request.route_url('user_edit', user_id=loop.index) }}'"{% endif %}>
               <th scope="row">{{ loop.index }}</th>
               <td>{{ user.firstname }}</td>
               <td>{{ user.lastname }}</td>
@@ -39,5 +39,4 @@
     <a class="btn btn-primary" href="{{ request.route_url('user_add') }}">Benutzer hinzufügen</a>
   {% endif %}
 </div>
-
 {% endblock content %}

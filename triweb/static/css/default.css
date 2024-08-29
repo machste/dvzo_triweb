@@ -25,6 +25,10 @@ input[type="number"]::-webkit-inner-spin-button {
   margin-left: 8px;
 }
 
+tr[onclick] {
+  cursor: pointer;
+}
+
 i.icon::before, [class^="icon-"]::before {
   content: '';
   display: inline-block;
