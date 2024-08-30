@@ -1,5 +1,5 @@
 import bcrypt
-from sqlalchemy import Column, Integer, Text
+from sqlalchemy import Column, Integer, Text, DateTime
 
 from triweb.models.meta import Base
 
@@ -13,6 +13,7 @@ class User(Base):
     nickname = Column(Text)
     passwd_hash = Column(Text)
     role = Column(Text, nullable=False, server_default="basic")
+    last_login = Column(DateTime)
 
     @property
     def display_name(self):
