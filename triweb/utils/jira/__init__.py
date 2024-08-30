@@ -13,14 +13,14 @@ _log = logging.getLogger(__name__)
 class Jira(object):
 
     FILTERS = {
-        'lok2.open': 10012,
-        'lok4.open': 10014,
-        'lok9.open': 10010,
-        'lok18.open': 10015,
-        'lok401.open': 10011,
-        'ee33.open': 10016,
+        'lok2.open': 10030,
+        'lok4.open': 10033,
+        'lok9.open': 10026,
+        'lok18.open': 10025,
+        'lok401.open': 10024,
+        'ee33.open': 10032,
         'tmiii.open': 10018,
-        'temiii.open': 10017,
+        'temiii.open': 10031,
         'general.open': 10027,
         'doing': 10023,
         'done': 10028
