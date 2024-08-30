@@ -20,5 +20,5 @@ def main(global_config, **settings):
                 SessionFactory(secret=settings['session.secret']))
         config.include('.routes')
         config.include('.models')
-        config.scan()
+        config.scan(ignore='triweb.alembic')
     return config.make_wsgi_app()
