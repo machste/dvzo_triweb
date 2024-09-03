@@ -38,14 +38,14 @@
             <li class="nav-item">
                 <a class="nav-link" id="calendar" href="{{ request.route_url('calendar') }}">Werkstattkalender</a>
             </li>
-            {% if request.has_permission('administrate') %}
+            {% if request.has_permission('manage') %}
               <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle" id="admin" href="#" role="button" data-bs-toggle="dropdown">
-                  Admin
-                  </a>
+                  <a class="nav-link dropdown-toggle" id="admin" href="#" role="button" data-bs-toggle="dropdown">Verwalten</a>
                   <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="{{ request.route_url('users') }}">Benutzer</a></li>
-                  <li><a class="dropdown-item" href="{{ request.route_url('workdays') }}">Arbeitstage</a></li>
+                    {% if request.has_permission('administrate') %}
+                      <li><a class="dropdown-item" href="{{ request.route_url('users') }}">Benutzer</a></li>
+                    {% endif %}
+                    <li><a class="dropdown-item" href="{{ request.route_url('workdays') }}">Arbeitstage</a></li>
                   </ul>
               </li>
             {% endif %}

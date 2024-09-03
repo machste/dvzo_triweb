@@ -9,7 +9,9 @@ class TriWebRoot(DefaultRootFactory):
 
     def __acl__(self):
         return [
-            (Allow, 'role:admin', 'administrate')
+            (Allow, 'role:admin', 'administrate'),
+            (Allow, 'role:admin', 'manage'),
+            (Allow, 'role:manager', 'manage')
         ]
 
 def includeme(config):
