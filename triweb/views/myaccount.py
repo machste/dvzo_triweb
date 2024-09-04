@@ -43,9 +43,9 @@ class MyAccount(View):
             if form.is_valid():
                 user = self.update_user(form)
                 form.reset()
-                form.populate(user)
+                form.copy_from(user)
         else:
-            form.populate(identity)
+            form.copy_from(identity)
         return dict(form=form)
 
     def update_user(self, form):

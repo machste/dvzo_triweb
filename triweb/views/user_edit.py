@@ -54,7 +54,7 @@ class UserEdit(View):
                         title='Benutzer gespeichert!', type=Toast.Type.SUCCESS)
                 return HTTPSeeOther(self.request.route_url('users'))
         else:
-            form.populate(user)
+            form.copy_from(user)
         return dict(form=form, user_roles=user_roles)
 
     def update_user(self, user, form):

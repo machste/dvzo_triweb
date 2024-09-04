@@ -17,11 +17,14 @@ class Form(object):
                 return field
         raise AttributeError()
 
-    def populate(self, values, default=None):
+    def copy_from(self, model):
         for field in self.fields:
-            new_value = getattr(values, field.name, default)
+            new_value = getattr(model, field.name, None)
             if new_value is not None:
                 field.value = new_value
+
+    def copy_to(self, model):
+        pass
 
     def validate_each(self, params):
         self.valid = True

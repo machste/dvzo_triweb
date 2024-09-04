@@ -26,6 +26,7 @@ def includeme(config):
     config.add_route('user_edit', '/user/edit/{user_id}')
     config.add_route('workdays', '/workdays')
     config.add_route('workday_add', '/workday/add')
+    config.add_route('workday_edit', '/workday/edit/{id}')
     config.add_route('myaccount', '/myaccount')
     config.add_route('settings', '/settings')
     config.add_route('login', '/login')
