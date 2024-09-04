@@ -2,6 +2,57 @@
 
 {% block content %}
 <div class="container content">
-  <h1>Arbeitstage</h1>
+  <h1>Arbeitstage Verwalten</h1>
+  {% if workdays | count > 0 %}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <caption>Liste aller Arbeitstage</caption>
+        <thead>
+          <tr>
+            <th scope="col">Datum</th>
+            <th scope="col">Arbeitszeiten</th>
+            <th scope="col">Triebfahrzeug</th>
+            <th scope="col">Titel</th>
+            <th scope="col">Leiter</th>
+            <th scope="col">Rottenküche</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for workday in workdays %}
+            <tr>
+              <td class="text-nowrap"><span convert="to_date">{{ workday.date }}</span></td>
+              <td>{{ workday.start_time.isoformat(timespec='minutes') }} - {{ workday.end_time.isoformat(timespec='minutes') }}</td>
+              <td class="text-nowrap"></td>
+              <td>{{ workday.title }}</td>
+              <td class="text-nowrap">{{ workday.manager.display_name }}</td>
+              <td>
+                {% if workday.cook %}
+                  <i class="icon icon-cook"></i>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-warning d-flex align-items-center my-4" role="alert">
+      <i class="bi bi-exclamation-triangle-fill flex-shrink-0 alert-icon"></i>
+      <div>
+        Es wurden keine Arbeitstage gefunden!
+      </div>
+    </div>
+  {% endif %}
+  {% if request.has_permission('manage') %}
+    <a class="btn btn-primary" href="{{ request.route_url('workday_add') }}">Arbeitstag hinzufügen</a>
+  {% endif %}
 </div>
+<script>
+  const date_elements = document.querySelectorAll("span[convert=to_date]");
+
+  for (el of date_elements) {
+    d = any_to_date(el.innerText);
+    el.innerText = to_date_string(d, true);
+  }
+</script>
 {% endblock content %}

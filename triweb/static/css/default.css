@@ -70,6 +70,10 @@ i.icon-prio-lowest:before {
   background-image: url(/static/imgs/prio-lowest.svg);
 }
 
+i.icon-cook:before {
+  background-image: url(/static/imgs/cook-1x.png);
+}
+
 div.alert i.alert-icon {
   font-size: 32px;
   margin-right: 1rem; 

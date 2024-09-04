@@ -1,5 +1,6 @@
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy import Boolean, Integer, Text, Date, Time
+from sqlalchemy.orm import relationship
 
 from triweb.models.meta import Base
 from triweb.models.user import User
@@ -15,4 +16,5 @@ class Workday(Base):
     title = Column(Text, nullable=False)
     description = Column(Text)
     cook = Column(Boolean, nullable=False, server_default='FALSE')
-
+    # Relations to other tables
+    manager = relationship(User)

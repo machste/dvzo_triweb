@@ -1,0 +1,52 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+<div class="container content">
+  <h1>Arbeitstag Hinzufügen</h1>
+
+  <form novalidate name="workday_add" method="post">
+    <div class="mb-2">
+      <label class="form-label" for="title">Titel</label>
+      <input class="form-control{{ form.title.get_valid_cls() | prefix(' ') }}" id="title" name="title" value="{{ form.title.value }}" />
+      <div class="invalid-feedback">{{ form.title.err_msg }}</div>
+    </div>
+    <div class="row g-2 mb-2">
+      <div class="col-md-6">
+        <label class="form-label" for="date">Datum</label>
+        <input class="form-control{{ form.date.get_valid_cls() | prefix(' ') }}" id="date" name="date" type="date" value="{{ form.date.value }}" />
+        <div class="invalid-feedback">{{ form.date.err_msg }}</div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="worktime">Arbeitszeiten</label>
+        <div class="input-group has-validataion" id="worktime">
+          <input class="form-control{{ form.start_time.get_valid_cls() | prefix(' ') }}" id="start_time" name="start_time" type="time" value="{{ form.start_time.value }}" />
+          <span class="input-group-text">bis</span>
+          <input class="form-control{{ form.end_time.get_valid_cls() | prefix(' ') }}" id="end_time" name="end_time" type="time" value="{{ form.end_time.value }}" />
+          <div class="invalid-feedback">{{ form.start_time.err_msg }}</div>
+          <div class="invalid-feedback">{{ form.end_time.err_msg }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="manager_id">Leiter</label>
+      <select class="form-select" id="manager_id" name="manager_id">
+        {% for id, dname in managers.items() %}
+          <option {{ 'selected' if form.manager_id.value == id }} value="{{ id }}">{{ dname }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="description">Beschreibung</label>
+      <textarea class="form-control" id="description" name="description" rows="5">{{ form.description.value }}</textarea>
+    </div>
+    <div class="form-check my-2">
+      <input class="form-check-input" id="cook" name="cook" type="checkbox" value="cook" {{ 'checked' if form.cook.value }}>
+      <label class="form-check-label" for="private">Rottenküche in Betrieb</label>
+    </div>
+    <div class="mt-4">
+      <button class="btn btn-primary" type="submit" name="form.submitted" value="workday_add">Speichern</button>
+      <a class="btn btn-secondary" href="{{ request.route_url('workdays') }}">Zurück</a>
+    </div>
+  </form>
+</div>
+{% endblock content %}
