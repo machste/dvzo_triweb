@@ -7,6 +7,7 @@ from triweb.views import View
 from triweb.models.user import User
 from triweb.utils.form import Form
 from triweb.utils.db import get_user_roles
+from triweb.utils.toast import Toast
 from triweb.errors import DatabaseError
 
 
@@ -39,7 +40,9 @@ class UserAdd(View):
                     field.err_msg = 'Die Passwörter müssen übereinstimmen!'
             # If all fields are correct, save new user
             if form.is_valid():
-                self.save_user(form)
+                user = self.save_user(form)
+                self.push_toast(f"Der Benutzer '{user.display_name}' wurde erfolgreich hinzugefügt!",
+                        title='Benutzer erstellt!', type=Toast.Type.SUCCESS)
                 return HTTPSeeOther(self.request.route_url('users'))
         return dict(form=form, user_roles=user_roles)
 
@@ -59,3 +62,4 @@ class UserAdd(View):
         except SQLAlchemyError as err:
             nested_transaction.rollback()
             raise DatabaseError(str(err))
+        return user

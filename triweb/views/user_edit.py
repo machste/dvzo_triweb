@@ -50,8 +50,8 @@ class UserEdit(View):
             # If all fields are correct, update user account data
             if form.is_valid():
                 user = self.update_user(user, form)
-                self.push_toast(f'Benutzer erfolgreich gespeichert!',
-                        type=Toast.Type.SUCCESS)
+                self.push_toast(f"Benutzer '{user.display_name}' wurde erfolgreich gespeichert!",
+                        title='Benutzer gespeichert!', type=Toast.Type.SUCCESS)
                 return HTTPSeeOther(self.request.route_url('users'))
         else:
             form.populate(user)
