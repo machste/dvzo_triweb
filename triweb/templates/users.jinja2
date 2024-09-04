@@ -23,7 +23,7 @@
               <td>{{ user.firstname }}</td>
               <td>{{ user.lastname }}</td>
               <td>{{ user.email }}</td>
-              <td><span convert="to_date">{{ user.last_login }}</span></td>
+              <td><span convert="to_datetime">{{ user.last_login }}</span></td>
             </tr>
           {% endfor %}
         </tbody>
@@ -42,11 +42,11 @@
   {% endif %}
 </div>
 <script>
-  const date_elements = document.querySelectorAll("span[convert=to_date]");
+  const dtime_elements = document.querySelectorAll("span[convert=to_datetime]");
 
-  for (date of date_elements) {
-    d = any_to_date(date.innerText);
-    date.innerText = to_datetime_string(d);
+  for (el of dtime_elements) {
+    d = any_to_date(el.innerText);
+    el.innerText = to_datetime_string(d);
   }
 </script>
 {% endblock content %}
