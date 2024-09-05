@@ -1,0 +1,22 @@
+{
+    "lang": "de",
+    "dir": "ltr",
+    "name": "DVZO Triebfahrzeuge",
+    "short_name": "DVZO",
+    "icons": [
+        {
+            "src": "../imgs/favicon.png",
+            "sizes": "any"
+        }
+    ],
+    "scope": "../../",
+    "start_url": "../../",
+    "display": "standalone",
+    "shortcuts" : [
+        {
+            "name": "Werkstattkalender",
+            "url": "../../calendar",
+            "description": "Wichtige Termine des Ressort Triebfahrzeuge im Überblick"
+        }
+    ]
+}
