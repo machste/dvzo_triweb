@@ -30,7 +30,7 @@
             </tr>
           </thead>
           <tbody>
-              <tr v-for="issue in issues">
+              <tr v-for="issue in issues" v-bind:onclick="'window.location=\'/issue/' + issue.id + '\''">
                 <td v-html="issue.type.icon"></td>
                 <td class="text-nowrap">{[ issue.engine ]}</td>
                 <td>{[ issue.summary ]}</td>
@@ -101,7 +101,7 @@
             </tr>
           </thead>
           <tbody>
-              <tr v-for="issue in issues">
+              <tr v-for="issue in issues" v-bind:onclick="'window.location=\'/issue/' + issue.id + '\''">
                 <td v-html="issue.type.icon"></td>
                 <td class="text-nowrap">{[ issue.engine ]}</td>
                 <td>{[ issue.summary ]}</td>
@@ -175,7 +175,7 @@
               </tr>
             </thead>
             <tbody>
-                <tr v-for="issue in issues">
+                <tr v-for="issue in issues" v-bind:onclick="'window.location=\'/issue/' + issue.id + '\''">
                   <td v-html="issue.type.icon"></td>
                   <td>{[ issue.summary ]}</td>
                   <td v-html="issue.priority.icon"></td>

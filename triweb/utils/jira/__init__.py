@@ -30,13 +30,13 @@ class Jira(object):
         self.url = url
         self.headers = { 'Accept': 'application/json' }
         self.auth = None
-        self.issue_cache = None
+        self.cache = None
 
     def set_auth(self, user, token):
         self.auth = HTTPBasicAuth(user, token)
 
-    def set_issue_cache(self, cache):
-        self.issue_cache = cache
+    def set_cache(self, cache):
+        self.cache = cache
 
     def request(self, path):
         url = self.url + path
@@ -47,6 +47,23 @@ class Jira(object):
             raise self.Error(f"Anfrage bei '{self.url}' hat fehlgeschlagen!")
         return res.json()
 
+    def get_issue(self, id, max_age=None):
+        # Check the issue cache
+        if self.cache is not None:
+            issue = self.cache.get_data('issues', id, max_age)
+        if issue is not None:
+            _log.debug(f"Request for issue #{id} hit cache.")
+            return issue
+        # Otherwise get the issue from Jira
+        path = f'/rest/api/3/issue/{id}'
+        js_issue = self.request(path)
+        issue = Issue.from_jira_js(js_issue)
+        _log.debug(f'Got issue {issue}')
+        # Update cache
+        if self.cache is not None:
+            self.cache.update_data('issues', id, issue)
+        return issue
+
     def get_issues(self, list_name, max_age=None):
         # Check list name
         try:
@@ -55,10 +72,10 @@ class Jira(object):
             _log.error(f"Issue list '{list_name}' does not exist!")
             return None
         # Check the issue cache
-        if self.issue_cache is not None:
-            issues = self.issue_cache.get_issues(list_name, max_age)
+        if self.cache is not None:
+            issues = self.cache.get_data('issue_lists', list_name, max_age)
         if issues is not None:
-            _log.debug(f"Request '{list_name}' hit issue cache.")
+            _log.debug(f"Request for issue list '{list_name}' hit cache.")
             return issues
         # Otherwise get the issues from Jira
         issues = []
@@ -70,14 +87,14 @@ class Jira(object):
             issue = Issue.from_jira_js(js_issue)
             issues.append(issue)
             _log.debug(f'Got issue {issue}')
-        # Update issue cache
-        if self.issue_cache is not None:
-            self.issue_cache.update_issues(list_name, issues)
+        # Update cache
+        if self.cache is not None:
+            self.cache.update_data('issue_lists', list_name, issues)
         return issues
 
 
     class Error(GeneralError):
-        
+
         TOPIC = 'Jira API'
 
 
@@ -87,24 +104,31 @@ class IssueCache(object):
         self.max_age = 3600
         self.data = {}
 
-    def get_issues(self, name, max_age=None):
+    def get_data(self, category, key, max_age=None):
         max_age = max_age if max_age is not None else self.max_age
-        d = self.data.get(name, None)
+        cat_data = self.data.get(category, None)
+        if cat_data is None:
+            return None
+        d = cat_data.get(key, None)
         if d is None:
             return None
         if time.time() - d.timestamp > max_age:
-            del self.data[name]
+            del cat_data[key]
             return None
-        return d.issues
+        return d.data
 
-    def update_issues(self, name, issues):
-        self.data[name] = self.Data(issues)
+    def update_data(self, category, key, data):
+        cat_data = self.data.get(category, None)
+        if cat_data is None:
+            cat_data = {}
+            self.data[category] = cat_data
+        cat_data[key] = self.Data(data)
 
     
     class Data(object):
 
-        def __init__(self, issues):
-            self.issues = issues
+        def __init__(self, data):
+            self.data = data
             self.timestamp = time.time()
 
 
@@ -118,7 +142,7 @@ def install_jira(config):
     def jira_factory(request):
         _log.debug('Create Jira API')
         jira = Jira(url)
-        jira.set_issue_cache(issue_cache)
+        jira.set_cache(issue_cache)
         if user is not None and token is not None:
             jira.set_auth(user, token)
         return jira

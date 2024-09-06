@@ -1,0 +1,25 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+
+<div class="container content">
+
+  <h1>{{issue.summary}}</h1>
+  {% if issue.has_engine() %}
+    <h2><span class="badge text-bg-secondary">{{ issue.engine }}</span></h2>
+  {% endif %}
+
+  {{ issue.description.write('html', header_offset=1) | safe }}
+
+</div>
+
+<script>
+  const date_elements = document.querySelectorAll("span[convert=to_date]");
+
+  for (el of date_elements) {
+    d = any_to_date(el.innerText);
+    el.innerText = to_date_string(d);
+  }
+</script>
+
+{% endblock content %}

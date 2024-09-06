@@ -1,16 +1,18 @@
 import logging
 
 from pyramid.view import view_config
+from pyramid.httpexceptions import HTTPNotFound
 
 from triweb.views import View
 
 _log = logging.getLogger(__name__)
 
 
-class Issues(View):
+class Issue(View):
 
-    @view_config(route_name='rest.issues', renderer='json')
+    @view_config(route_name='issue', renderer='issue.jinja2')
     def view(self):
+        issue_id = self.request.matchdict['id']
         max_age = self.request.params.get('max_age')
         if max_age is not None:
             try:
@@ -18,12 +20,8 @@ class Issues(View):
             except:
                 _log.warn(f"Expected int for max_age not '{max_age}'!")
                 max_age = None
-        data = { 'issues': [] }
-        list_name = self.request.matchdict['list_name']
-        if list_name is None:
-            return data
-        issues = self.request.jira.get_issues(list_name, max_age)
-        if issues is None:
-            return data
-        data['issues'] = issues
-        return data
+        # Get issue from jira
+        issue = self.request.jira.get_issue(issue_id, max_age)
+        if issue is None:
+            raise HTTPNotFound()
+        return dict(issue=issue)

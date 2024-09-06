@@ -1,6 +1,7 @@
 from enum import Enum
 from datetime import date
 
+from triweb.utils.jira.adf import Document
 
 class EnumValue(object):
 
@@ -99,6 +100,7 @@ class Issue(object):
         self._difficulty = Issue.Difficulty.DEFAULT
         self._engine = Issue.Engine.DEFAULT
         self._summary = '(Kein Titel)'
+        self.description = None
         self.workers = []
         self._created = None
         self._duedate = None
@@ -150,6 +152,9 @@ class Issue(object):
             return self._summary.split(' - ', 1)[1]
         except IndexError:
             return self._summary
+
+    def has_engine(self):
+        return self._engine != Issue.Engine.DEFAULT
 
     @staticmethod
     def parse_date(date_str):
@@ -221,7 +226,7 @@ class Issue(object):
                 pass
         if 'customfield_10069' in fields:
             self.workers = []
-            jira_worker_names = fields.get('customfield_10069')
+            jira_worker_names = fields['customfield_10069']
             if jira_worker_names is not None:
                 worker_names = jira_worker_names.split(',')
                 for worker_name in worker_names:
@@ -229,6 +234,8 @@ class Issue(object):
                     if len(worker_name) == 0:
                         continue
                     self.workers.append(Worker(worker_name))
+        if 'description' in fields:
+            self.description = Document.load(fields['description'])
         return self
 
     def __json__(self, request=None):
