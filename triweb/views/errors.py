@@ -1,10 +1,14 @@
+from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.view import (forbidden_view_config, notfound_view_config,
         exception_view_config)
 
-from triweb.errors import DatabaseError, GeneralError
+from triweb.errors import GeneralError
 
 @forbidden_view_config(renderer='triweb:templates/errors/403.jinja2')
 def forbidden_view(request):
+    if request.identity is None:
+        next_url = request.route_url('login', _query={'next_url': request.url})
+        return HTTPSeeOther(location=next_url)
     request.response.status = 403
     return {}
 

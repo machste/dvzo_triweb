@@ -10,13 +10,15 @@ from triweb.models.user import User
 
 _log = logging.getLogger(__name__)
 
+DEFAULT_ROUTE = 'home'
+
 @view_config(route_name='login', renderer='login.jinja2')
 def login(request):
-    login_url = request.route_url('login')
-    referrer = request.url
-    if referrer == login_url:
-        referrer = '/'
-    came_from = request.params.get('came_from', referrer)
+    if request.identity is not None:
+        return HTTPFound(location=request.route_url(DEFAULT_ROUTE))
+    next_url = request.params.get('next_url', request.referrer)
+    if not next_url:
+        next_url = request.route_url(DEFAULT_ROUTE)
     message = ''
     email = ''
     password = ''
@@ -31,12 +33,12 @@ def login(request):
                 _log.info(f"User '{user.display_name}' is logged in.")
                 update_login_data(request, user)
                 headers = remember(request, user.id)
-                return HTTPFound(location=came_from, headers=headers)
+                return HTTPFound(location=next_url, headers=headers)
             message = 'Die Anmeldung hat fehlgeschlagen!'
         except SQLAlchemyError:
             message = 'Es gibt keinen Benutzer mit dieser E-Mail!'
     return dict(message=message, url=request.route_url('login'),
-            came_from=came_from, email=email, password=password)
+            next_url=next_url, email=email, password=password)
 
 def update_login_data(request, user):
     # Start nested transaction
