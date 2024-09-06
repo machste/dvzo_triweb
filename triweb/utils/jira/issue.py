@@ -235,7 +235,9 @@ class Issue(object):
                         continue
                     self.workers.append(Worker(worker_name))
         if 'description' in fields:
-            self.description = Document.load(fields['description'])
+            description = fields['description']
+            if description is not None:
+                self.description = Document.load(description)
         return self
 
     def __json__(self, request=None):
