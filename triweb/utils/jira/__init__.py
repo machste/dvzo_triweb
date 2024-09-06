@@ -62,7 +62,7 @@ class Jira(object):
             return issues
         # Otherwise get the issues from Jira
         issues = []
-        path = f'/rest/api/3/search?&fields=issuetype,status,priority,summary,created,duedate,resolutiondate,customfield_10058,customfield_10069&jql=filter%3D{filter_id}'
+        path = f'/rest/api/3/search?&fields=issuetype,status,priority,summary,created,duedate,resolutiondate,customfield_10058,customfield_10067,customfield_10069&jql=filter%3D{filter_id}'
         js = self.request(path)
         js_issues = js['issues']
         _log.info(f"Get issues '{list_name}' (id: {filter_id}) ...")

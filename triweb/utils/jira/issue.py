@@ -69,6 +69,15 @@ class Issue(object):
         DUPLICAT = EnumValue(10044, 'Duplikat')
         DEFAULT = TO_DO
 
+    class Difficulty(Enum):
+        NOT_RATED = EnumValue(10124, 'nicht bewertet')
+        EASY = EnumValue(10122, 'einfach', 'diff-low')
+        MEDIUM = EnumValue(10120, 'mittel', 'diff-medium')
+        HARD = EnumValue(10121, 'anspruchsvoll', 'diff-high')
+        SUPERVISED = EnumValue(10123, 'betreut')
+        MASTERS_ONLY = EnumValue(10119, 'sehr schwierig', 'diff-highest')
+        DEFAULT = NOT_RATED
+
     class Engine(Enum):
         GENERAL = EnumValue(10110, 'Allgemein')
         LOK2 = EnumValue(10111, 'Ed 3/4 2 "Hinwil"')
@@ -87,6 +96,7 @@ class Issue(object):
         self._type = Issue.Type.DEFAULT
         self._priority = Issue.Priority.DEFAULT
         self._status = Issue.Status.DEFAULT
+        self._difficulty = Issue.Difficulty.DEFAULT
         self._engine = Issue.Engine.DEFAULT
         self._summary = '(Kein Titel)'
         self.workers = []
@@ -113,6 +123,10 @@ class Issue(object):
     @property
     def status(self):
         return self._status.value.name
+
+    @property
+    def difficulty(self):
+        return self._difficulty.value.name
 
     @property
     def engine(self):
@@ -196,6 +210,15 @@ class Issue(object):
                         break
             except:
                 pass
+        if 'customfield_10067' in fields:
+            try:
+                difficulty_id = int(fields['customfield_10067']['id'])
+                for member in Issue.Difficulty:
+                    if member.value.id == difficulty_id:
+                        self._difficulty = member
+                        break
+            except:
+                pass
         if 'customfield_10069' in fields:
             self.workers = []
             jira_worker_names = fields.get('customfield_10069')
@@ -211,9 +234,10 @@ class Issue(object):
     def __json__(self, request=None):
         return dict(id=self.id, key=self.key, type=self._type.value,
                 priority=self._priority.value, status=self.status,
-                engine=self.engine, created=self._created,
-                duedate=self._duedate, resolved=self._resolved,
-                workers=self.workers, summary=self.summary)
+                difficulty=self._difficulty.value, engine=self.engine,
+                created=self._created, duedate=self._duedate,
+                resolved=self._resolved, workers=self.workers,
+                summary=self.summary)
 
     def __str__(self):
         return f'{self.key}: {self._summary}'

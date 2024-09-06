@@ -70,6 +70,22 @@ i.icon-prio-lowest:before {
   background-image: url(/static/imgs/prio-lowest.svg);
 }
 
+i.icon-diff-highest:before {
+  background-image: url(/static/imgs/diff-highest.svg);
+}
+
+i.icon-diff-high:before {
+  background-image: url(/static/imgs/diff-high.svg);
+}
+
+i.icon-diff-medium:before {
+  background-image: url(/static/imgs/diff-medium.svg);
+}
+
+i.icon-diff-low:before {
+  background-image: url(/static/imgs/diff-low.svg);
+}
+
 i.icon-cook:before {
   background-image: url(/static/imgs/cook-1x.png);
 }
