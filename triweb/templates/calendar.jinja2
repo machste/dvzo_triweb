@@ -1,491 +1,98 @@
 {% extends "layout.jinja2" %}
 
-{% block content %}
+{% macro month_card(month) -%}
+<div class="card cal-month">
+  <div class="card-body">
+    <div class="card-title">{{ month_titles[month] }}</div>
+  </div>
+</div>
+{%- endmacro %}
 
+{% macro workday_card(workday) -%}
+<div class="card cal-workday">
+  <div class="card-header">
+    <div class="workday-datetime">
+      <div class="workday-date"><span convert="to_date">{{ workday.date }}</span></div>
+      <div class="workday-time">
+        <i class="bi bi-clock me-2"></i>{{ workday.start_time.hour }}<sup>{{ '%02d' % workday.start_time.minute }}</sup> - {{ workday.end_time.hour }}<sup>{{ '%02d' % workday.end_time.minute }}</sup>
+      </div>
+    </div>
+    {% if workday.cook %}
+      <div class="workday-cook"></div>
+    {% endif %}
+  </div>
+  <div class="card-body">
+    <div class="workday-badges">
+      {% if workday.vehicle is not none %}
+        <span class="badge badge-lok lok-godfather-1">{{ workday.vehicle.short_name or workday.vehicle.name }}</span>
+      {% else %}
+        <div class="workday-badges"><span class="badge badge-workshop">Werkstatt</span></div>
+      {% endif %}
+    </div>
+    <div class="card-title">{{ workday.title }}</div>
+    {% if workday.description is not none %}
+      {{ workday.description | md_to_html }}
+    {% endif %}
+  </div>
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: {{ workday.manager.display_name }}">
+      <i class="bi bi-person-gear"></i>
+    </div>
+    <div class="btn-group btn-group-sm" role="group">
+      <input type="radio" class="btn-check" name="btnradio{{ workday.id }}" id="btnradio{{ workday.id }}-1">
+      <label class="btn btn-outline-danger" for="btnradio{{ workday.id }}-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
+      <input type="radio" class="btn-check" name="btnradio{{ workday.id }}" id="btnradio{{ workday.id }}-2">
+      <label class="btn btn-outline-warning" for="btnradio{{ workday.id }}-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
+      <input type="radio" class="btn-check" name="btnradio{{ workday.id }}" id="btnradio{{ workday.id }}-3">
+      <label class="btn btn-outline-success" for="btnradio{{ workday.id }}-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
+    </div>
+  </div>
+</div>
+{%- endmacro %}
+
+
+{% block head %}
 <link rel="stylesheet" href="{{ request.static_url('triweb:static/css/calendar.css') }}">
+{% endblock head %}
 
+{% block content %}
 <div class="container content">
-
   <h1>Werkstattkalender</h1>
-
   <p>
-    Bitte meldet euch über die <a href="https://nuudel.digitalcourage.de/e1r6zNUHQYmiRtd2" target="_blank">Terminumfrage</a>
-    zu den einzelnen Werkstatt-Tagen, Events oder Seminaren
-    an. Die Leiter des jeweiligen Anlasses werden sich etwa eine Woche vorher
-    mit weiteren Informationen bei euch melden. Anpassungen und Ergänzungen im
-    Programm werden zeitnah kommuniziert.
+    Bitte tragt eure Verfügbarkeit für die einzelnen Arbeitstage, Events oder
+    Seminaren im untenstehenden Kalender ein. Die Leiter des jeweiligen Anlasses
+    werden sich etwa eine Woche vor dem Termin bei euch mit weiteren
+    Informationen melden. Anpassungen und Ergänzungen im Werkstattkalender
+    werden zeitnah kommuniziert.
   </p>
   <p>
-    Jeder Eintrag in der Umfrage wird als verbindliche An- oder Abmeldung zum
-    jeweiligen Anlass verstanden.
+    Jeder Eintrag im Werkstattkalender wird als verbindliche An- oder Abmeldung
+    zum jeweiligen Anlass verstanden.
   </p>
-
   <div class="row my-4 g-2">
-    <div class="col col-xxl-2 col-lg-3 col-md-4 col-sm-6">
-      <div class="card cal-month">
-        <div class="card-body">
-          <div class="card-title">JUNI</div>
-        </div>
+    {% for column in columns %}
+      <div class="col col-xxl-2 col-lg-3 col-md-4 col-sm-6">
+        {% for month in column %}
+          {{ month_card(month.num) }}
+          {% for workday in month.workdays %}
+            {{ workday_card(workday) }}
+          {% endfor %}
+        {% endfor %}
       </div>
-
-      <div class="card cal-workday">
-        <div class="card-header">
-          <div class="workday-datetime">
-            <div class="workday-date">Sa., 1.6</div>
-            <div class="workday-time">
-              <i class="bi bi-clock me-2"></i>9<sup>00</sup> - 17<sup>00</sup>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="workday-badges">
-            <span class="badge badge-lok lok-godfather-4">Ee 3/3</span>
-          </div>
-          <div class="card-title">Arbeitstag</div>
-          <ul>
-            <li>Reparatur des Führerhausdaches</li>
-            <li>Vorbereitung für die TK</li>
-          </ul>
-        </div>
-        <div class="card-footer workday-personnel">
-          <div><i class="bi bi-person-gear me-1"></i><span>Patrick Ramel</span></div>
-          <div><i class="bi bi-people me-1"></i><span>Mike Hemple</span>, <span>Markus Jung</span></div>
-        </div>
-      </div>
-
-      <div class="card cal-workday">
-        <div class="card-header">
-          <div class="workday-datetime">
-            <div class="workday-date">Sa., 22.6</div>
-            <div class="workday-time">
-              <i class="bi bi-clock me-2"></i>9<sup>00</sup> - 17<sup>00</sup>
-            </div>
-          </div>
-          <div class="workday-cook"></div>
-        </div>
-        <div class="card-body">
-          <div class="workday-badges">
-            <span class="badge badge-lok lok-godfather-2">8518</span>
-          </div>
-          <div class="card-title">Auswaschen</div>
-        </div>
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: Sergio Theiler">
-            <i class="bi bi-person-gear"></i>
-          </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <input type="radio" class="btn-check" name="btnradio02" id="btnradio02-1">
-            <label class="btn btn-outline-danger" for="btnradio02-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-            <input type="radio" class="btn-check" name="btnradio02" id="btnradio02-2">
-            <label class="btn btn-outline-warning" for="btnradio02-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-            <input type="radio" class="btn-check" name="btnradio02" id="btnradio02-3">
-            <label class="btn btn-outline-success" for="btnradio02-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
-          </div>
-        </div>
-        <!-- Next work -->
-        <div class="card-body border-top">
-          <div class="workday-badges"><span class="badge badge-lok lok-godfather-4">Ee 3/3</span></div>
-          <div class="card-title">Arbeitstag</div>
-          <ul>
-            <li>Reparatur des Führerhausdaches</li>
-            <li>Vorbereitung für die TK</li>
-          </ul>
-        </div>
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: Patrick Ramel">
-            <i class="bi bi-person-gear"></i>
-          </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <input type="radio" class="btn-check" name="btnradio03" id="btnradio03-1">
-            <label class="btn btn-outline-danger" for="btnradio03-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-            <input type="radio" class="btn-check" name="btnradio03" id="btnradio03-2">
-            <label class="btn btn-outline-warning" for="btnradio03-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-            <input type="radio" class="btn-check" name="btnradio03" id="btnradio03-3">
-            <label class="btn btn-outline-success" for="btnradio03-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col col-xxl-2 col-lg-3 col-md-4 col-sm-6">
-      <div class="card cal-month">
-        <div class="card-body">
-          <div class="card-title">JULI</div>
-        </div>
-      </div>
-
-      <div class="card cal-workday">
-        <div class="card-header">
-          <div class="workday-datetime">
-            <div class="workday-date">Di., 16.7</div>
-            <div class="workday-time">
-              <i class="bi bi-clock me-2"></i>17<sup>00</sup> - 22<sup>00</sup>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="workday-badges">
-            <span class="badge badge-lok lok-godfather-2">8518</span>
-          </div>
-          <div class="card-title">Russen</div>
-        </div>
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: Sergio Theiler">
-            <i class="bi bi-person-gear"></i>
-          </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <input type="radio" class="btn-check" name="btnradio04" id="btnradio04-1">
-            <label class="btn btn-outline-danger" for="btnradio04-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-            <input type="radio" class="btn-check" name="btnradio04" id="btnradio04-2">
-            <label class="btn btn-outline-warning" for="btnradio04-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-            <input type="radio" class="btn-check" name="btnradio04" id="btnradio04-3">
-            <label class="btn btn-outline-success" for="btnradio04-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
-          </div>
-        </div>
-      </div>
-
-      <div class="card cal-workday">
-        <div class="card-header">
-          <div class="workday-datetime">
-            <div class="workday-date">Sa., 27.7</div>
-            <div class="workday-time">
-              <i class="bi bi-clock me-2"></i>9<sup>00</sup> - 17<sup>00</sup>
-            </div>
-          </div>
-          <div class="workday-cook"></div>
-        </div>
-        <div class="card-body">
-          <div class="workday-badges">
-            <span class="badge badge-lok lok-godfather-3">Lok 9</span>
-          </div>
-          <div class="card-title">Auswaschen</div>
-        </div>
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: Sergio Theiler">
-            <i class="bi bi-person-gear"></i>
-          </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <input type="radio" class="btn-check" name="btnradio05" id="btnradio05-1">
-            <label class="btn btn-outline-danger" for="btnradio05-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-            <input type="radio" class="btn-check" name="btnradio05" id="btnradio05-2">
-            <label class="btn btn-outline-warning" for="btnradio05-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-            <input type="radio" class="btn-check" name="btnradio05" id="btnradio05-3">
-            <label class="btn btn-outline-success" for="btnradio05-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
-          </div>
-        </div>
-        <!-- Next work -->
-        <div class="card-body border-top">
-          <div class="workday-badges"><span class="badge badge-lok">Tm / Tem</span></div>
-          <div class="card-title">Arbeitstag</div>
-          <ul>
-            <li>Bremsgestänge reinigen und einstellen</li>
-            <li>Einfache Unterhaltsarbeiten durchführen</li>
-          </ul>
-        </div>
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: Jonas Dolny">
-            <i class="bi bi-person-gear"></i>
-          </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <input type="radio" class="btn-check" name="btnradio06" id="btnradio06-1">
-            <label class="btn btn-outline-danger" for="btnradio06-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-            <input type="radio" class="btn-check" name="btnradio06" id="btnradio06-2">
-            <label class="btn btn-outline-warning" for="btnradio06-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-            <input type="radio" class="btn-check" name="btnradio06" id="btnradio06-3">
-            <label class="btn btn-outline-success" for="btnradio06-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="col col-xxl-2 col-lg-3 col-md-4 col-sm-6">
-      <div class="card cal-month">
-        <div class="card-body">
-          <div class="card-title">AUGUST</div>
-        </div>
-      </div>
-      <div class="card cal-workday">
-        <div class="card-header">
-          <div class="workday-datetime">
-            <div class="workday-date">Di., 6.8</div>
-            <div class="workday-time">
-              <i class="bi bi-clock me-2"></i>17<sup>00</sup> - 22<sup>00</sup>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="workday-badges">
-            <span class="badge badge-lok lok-godfather-3">Lok 9</span>
-          </div>
-          <div class="card-title">Russen</div>
-        </div>
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: Sergio Theiler">
-            <i class="bi bi-person-gear"></i>
-          </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <input type="radio" class="btn-check" name="btnradio07" id="btnradio07-1">
-            <label class="btn btn-outline-danger" for="btnradio07-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-            <input type="radio" class="btn-check" name="btnradio07" id="btnradio07-2">
-            <label class="btn btn-outline-warning" for="btnradio07-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-            <input type="radio" class="btn-check" name="btnradio07" id="btnradio07-3">
-            <label class="btn btn-outline-success" for="btnradio07-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
-          </div>
-        </div>
-      </div>
-
-      <div class="card cal-workday">
-        <div class="card-header">
-          <div class="workday-datetime">
-            <div class="workday-date">Di., 20.8</div>
-            <div class="workday-time">
-              <i class="bi bi-clock me-2"></i>17<sup>00</sup> - 22<sup>00</sup>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="workday-badges">
-            <span class="badge badge-lok lok-godfather-1">401</span>
-          </div>
-          <div class="card-title">Russen</div>
-        </div>
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: Stefan Mächler">
-            <i class="bi bi-person-gear"></i>
-          </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <input type="radio" class="btn-check" name="btnradio08" id="btnradio08-1">
-            <label class="btn btn-outline-danger" for="btnradio08-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-            <input type="radio" class="btn-check" name="btnradio08" id="btnradio08-2">
-            <label class="btn btn-outline-warning" for="btnradio08-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-            <input type="radio" class="btn-check" name="btnradio08" id="btnradio08-3">
-            <label class="btn btn-outline-success" for="btnradio08-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
-          </div>
-        </div>
-      </div>
-
-      <div class="card cal-workday">
-        <div class="card-header">
-          <div class="workday-datetime">
-            <div class="workday-date">Sa., 24.8</div>
-            <div class="workday-time">
-              <i class="bi bi-clock me-2"></i>9<sup>00</sup> - 17<sup>00</sup>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="workday-badges">
-            <span class="badge badge-lok lok-godfather-1">401</span>
-          </div>
-          <div class="card-title">Auswaschen</div>
-        </div>
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: Stefan Mächler">
-            <i class="bi bi-person-gear"></i>
-          </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <input type="radio" class="btn-check" name="btnradio09" id="btnradio09-1">
-            <label class="btn btn-outline-danger" for="btnradio09-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-            <input type="radio" class="btn-check" name="btnradio09" id="btnradio09-2">
-            <label class="btn btn-outline-warning" for="btnradio09-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-            <input type="radio" class="btn-check" name="btnradio09" id="btnradio09-3">
-            <label class="btn btn-outline-success" for="btnradio09-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="col col-xxl-2 col-lg-3 col-md-4 col-sm-6">
-      <div class="card cal-month">
-        <div class="card-body">
-          <div class="card-title">SETPEMBER</div>
-        </div>
-      </div>
-      <div class="card cal-workday">
-        <div class="card-header">
-          <div class="workday-datetime">
-            <div class="workday-date">Sa., 21.9</div>
-            <div class="workday-time">
-              <i class="bi bi-clock me-2"></i>9<sup>00</sup> - 17<sup>00</sup>
-            </div>
-          </div>
-          <div class="workday-cook"></div>
-        </div>
-        <div class="card-body border-top">
-          <div class="workday-badges"><span class="badge badge-workshop">Werkstatt</span></div>
-          <div class="card-title">Aufräumaktion</div>
-          <ul>
-            <li>Werkstatt aufräumen</li>
-            <li>Wartung der Maschinen</li>
-            <li>Einfache Unterhaltsarbeiten an den Traktoren durchführen</li>
-          </ul>
-        </div>
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: Lukas Trüb">
-            <i class="bi bi-person-gear"></i>
-          </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <input type="radio" class="btn-check" name="btnradio10" id="btnradio10-1">
-            <label class="btn btn-outline-danger" for="btnradio10-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-            <input type="radio" class="btn-check" name="btnradio10" id="btnradio10-2">
-            <label class="btn btn-outline-warning" for="btnradio10-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-            <input type="radio" class="btn-check" name="btnradio10" id="btnradio10-3">
-            <label class="btn btn-outline-success" for="btnradio10-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="col col-xxl-2 col-lg-3 col-md-4 col-sm-6">
-      <div class="card cal-month">
-        <div class="card-body">
-          <div class="card-title">OKTOBER</div>
-        </div>
-      </div>
-      <div class="card cal-workday">
-        <div class="card-header">
-          <div class="workday-datetime">
-            <div class="workday-date">Di., 8.10</div>
-            <div class="workday-time">
-              <i class="bi bi-clock me-2"></i>17<sup>00</sup> - 22<sup>00</sup>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="workday-badges">
-            <span class="badge badge-lok lok-godfather-1">401</span>
-          </div>
-          <div class="card-title">Auswaschen</div>
-        </div>
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: Stefan Mächler">
-            <i class="bi bi-person-gear"></i>
-          </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <input type="radio" class="btn-check" name="btnradio11" id="btnradio11-1">
-            <label class="btn btn-outline-danger" for="btnradio11-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-            <input type="radio" class="btn-check" name="btnradio11" id="btnradio11-2">
-            <label class="btn btn-outline-warning" for="btnradio11-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-            <input type="radio" class="btn-check" name="btnradio11" id="btnradio11-3">
-            <label class="btn btn-outline-success" for="btnradio11-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
-          </div>
-        </div>
-      </div>
-
-      <div class="card cal-workday">
-        <div class="card-header">
-          <div class="workday-datetime">
-            <div class="workday-date">Sa., 26.10</div>
-            <div class="workday-time">
-              <i class="bi bi-clock me-2"></i>9<sup>00</sup> - 17<sup>00</sup>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="workday-badges">
-            <span class="badge badge-lok lok-godfather-3">Lok 9</span>
-          </div>
-          <div class="card-title">Auswaschen & Einwintern</div>
-        </div>
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: Sergio Theiler">
-            <i class="bi bi-person-gear"></i>
-          </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <input type="radio" class="btn-check" name="btnradio12" id="btnradio12-1">
-            <label class="btn btn-outline-danger" for="btnradio12-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-            <input type="radio" class="btn-check" name="btnradio12" id="btnradio12-2">
-            <label class="btn btn-outline-warning" for="btnradio12-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-            <input type="radio" class="btn-check" name="btnradio12" id="btnradio12-3">
-            <label class="btn btn-outline-success" for="btnradio12-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="col col-xxl-2 col-lg-3 col-md-4 col-sm-6">
-      <div class="card cal-month">
-        <div class="card-body">
-          <div class="card-title">NOVEMBER</div>
-        </div>
-      </div>
-      <div class="card cal-workday">
-        <div class="card-header">
-          <div class="workday-datetime">
-            <div class="workday-date">Sa., 2.11</div>
-            <div class="workday-time">
-              <i class="bi bi-clock me-2"></i>9<sup>00</sup> - 17<sup>00</sup>
-            </div>
-          </div>
-          <div class="workday-cook"></div>
-        </div>
-        <div class="card-body">
-          <div class="workday-badges">
-            <span class="badge badge-lok lok-godfather-2">8518</span>
-          </div>
-          <div class="card-title">Auswaschen & Einwintern</div>
-        </div>
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: Sergio Theiler">
-            <i class="bi bi-person-gear"></i>
-          </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <input type="radio" class="btn-check" name="btnradio13" id="btnradio13-1">
-            <label class="btn btn-outline-danger" for="btnradio13-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-            <input type="radio" class="btn-check" name="btnradio13" id="btnradio13-2">
-            <label class="btn btn-outline-warning" for="btnradio13-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-            <input type="radio" class="btn-check" name="btnradio13" id="btnradio13-3">
-            <label class="btn btn-outline-success" for="btnradio13-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
-          </div>
-        </div>
-      </div>
-
-      <div class="card cal-month">
-        <div class="card-body">
-          <div class="card-title">DEZEMBER</div>
-        </div>
-      </div>
-
-      <div class="card cal-workday">
-        <div class="card-header">
-          <div class="workday-datetime">
-            <div class="workday-date">Sa., 14.12</div>
-            <div class="workday-time">
-              <i class="bi bi-clock me-2"></i>9<sup>00</sup> - 17<sup>00</sup>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="workday-badges">
-            <span class="badge badge-lok lok-godfather-1">401</span>
-          </div>
-          <div class="card-title">Auswaschen & Einwintern</div>
-        </div>
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: Stefan Mächler">
-            <i class="bi bi-person-gear"></i>
-          </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <input type="radio" class="btn-check" name="btnradio14" id="btnradio14-1">
-            <label class="btn btn-outline-danger" for="btnradio14-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-            <input type="radio" class="btn-check" name="btnradio14" id="btnradio14-2">
-            <label class="btn btn-outline-warning" for="btnradio14-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-            <input type="radio" class="btn-check" name="btnradio14" id="btnradio14-3">
-            <label class="btn btn-outline-success" for="btnradio14-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
+    {% endfor %}
   </div>
 </div>
 <script>
-  tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-  tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+  const tooltip_elements = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+  let tooltips = []
+  for (el of tooltip_elements) {
+    tooltips.push(new bootstrap.Tooltip(el))
+  }
+
+  const date_elements = document.querySelectorAll("span[convert=to_date]");
+  for (el of date_elements) {
+    d = any_to_date(el.innerText);
+    el.innerText = d.toLocaleDateString('de', {weekday:'short', day:'numeric', month:'numeric'})
+  }
 </script>
 {% endblock content %}

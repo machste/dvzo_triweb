@@ -1,6 +1,6 @@
 from triweb.models.user import User
 from triweb.models.vehicle import Vehicle
-
+from triweb.models.workday import Workday
 
 def get_user_roles(dbsession):
     # Currently this is hardcoded
@@ -25,3 +25,8 @@ def get_engine_display_names(dbsession, limit=25):
     for engine in engines:
         display_names[engine.id] = engine.display_name
     return display_names
+
+def get_active_workdays(dbsession):
+    #TODO: For simplicity get all workdays for the moment.
+    workdays = dbsession.query(Workday).all()
+    return workdays

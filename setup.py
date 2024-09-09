@@ -22,6 +22,7 @@ requires = [
     'transaction',
     'zope.sqlalchemy',
     'requests',
+    'markdown',
 ]
 
 tests_require = [
