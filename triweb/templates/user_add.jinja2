@@ -16,13 +16,18 @@
       <div class="invalid-feedback">{{ form.lastname.err_msg|default('') }}</div>
     </div>
     <div class="mb-2">
+      <label class="form-label" for="nickname">Spitzname</label>
+      <input class="form-control{{ form.nickname.get_valid_cls() | prefix(' ')  }}" id="nickname" name="nickname" value="{{ form.nickname.value }}" autocomplete="off" />
+      <div class="invalid-feedback">{{ form.nickname.err_msg }}</div>
+    </div>
+    <div class="mb-2">
       <label class="form-label" for="email">E-Mail Adresse</label>
       <input class="form-control{{ form.email.get_valid_cls() | prefix(' ') }}" id="email" type="email" name="email" value="{{ form.email.value }}" autocomplete="off" />
       <div class="invalid-feedback">{{ form.email.err_msg|default('') }}</div>
     </div>
     <div class="mb-2">
       <label class="form-label" for="role" >Funktion</label>
-      <select class="form-select{{ form.email.get_valid_cls() | prefix(' ') }}" id="role" name="role">
+      <select class="form-select{{ form.role.get_valid_cls() | prefix(' ') }}" id="role" name="role">
         {% for role, role_desc in user_roles.items() %}
           <option {{ 'selected' if form.role.value == role }} value="{{ role }}">{{ role_desc }}</option>
         {% endfor %}
