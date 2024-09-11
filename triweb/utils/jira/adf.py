@@ -145,20 +145,42 @@ class Document(object):
             else:
                 _log.error(f"Unknown element type '{t}'!")
 
+        def mark_text_link(self, attrs, text):
+            href = attrs.get('href')
+            if href is None:
+                return text
+            return f'<a href="{href}" target="blank">{text}</a>'
+
+        def mark_text(self, t, attrs, text):
+            if t == 'link':
+                text = self.mark_text_link(attrs, text)
+            else:
+                _log.error(f"Unknown text mark type '{t}'!")
+            return text
+
         def write(self, content):
             for el in content:
                 if 'type' not in el:
                     _log.error('No type defined for document element!')
                     continue
-                # Handle simple text elements here
+                # Get element type
                 t = el['type']
                 if t == 'text':
-                    self.html += el.get('text')
-                    continue
-                # Handle more complex elements
-                attrs = el.get('attrs', {})
-                content = el.get('content', [])
-                self.write_element(t, attrs, content)
+                    # Handle text elements here
+                    text = el.get('text')
+                    marks = el.get('marks', [])
+                    for mark in marks:
+                        if 'type' not in mark:
+                            _log.error('No type defined for text mark!')
+                            continue
+                        attrs = mark.get('attrs')
+                        text = self.mark_text(mark['type'], attrs, text)
+                    self.html += text
+                else:
+                    # Handle more complex elements
+                    attrs = el.get('attrs', {})
+                    content = el.get('content', [])
+                    self.write_element(t, attrs, content)
             return self.html
 
 
