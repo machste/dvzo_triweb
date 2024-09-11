@@ -1,7 +1,9 @@
 import logging
+import os
 import json
 
 from datetime import date
+from urllib.parse import urlparse
 
 from triweb.errors import GeneralError
 
@@ -42,9 +44,10 @@ class Document(object):
 
     class Html(object):
 
-        def __init__(self, header_offset=0):
+        def __init__(self, header_offset=0, issue_id=None):
             self.html = ''
             self.header_offset = header_offset
+            self.issue_id = issue_id
 
         def write_paragraph(self, attrs, content):
             self.html += '<p>'
@@ -65,6 +68,59 @@ class Document(object):
             self.write(content)
             self.html += f'</h{level}>\n'
 
+        def write_mention(self, attrs, content):
+            user = attrs.get('text')
+            if user.startswith('@'):
+                user = user[1:]
+            self.html += f'<span class="text-nowrap">{user}</span>'
+
+        def write_issue_link(self, attrs, content):
+            jira_url = urlparse(attrs.get('url'))
+            issue_key = os.path.basename(jira_url.path)
+            if len(issue_key) > 0:
+                url = f'/issue/{issue_key}'
+            else:
+                issue_key = '<em>ungültige Referenz</em>'
+                url = '#'
+            self.html += f'<a href="{url}">{issue_key}</a>'
+
+        def write_bullet_list(self, attrs, content):
+            self.html += '<ul>\n'
+            self.write(content)
+            self.html += '</ul>\n'
+
+        def write_ordered_list(self, attrs, content):
+            start = attrs.get('order', 1)
+            self.html += f'<ol start="{start}">\n'
+            self.write(content)
+            self.html += '</ol>\n'
+
+        def write_list_item(self, attrs, content):
+            self.html += '<li>\n'
+            self.write(content)
+            self.html += '</li>\n'
+
+        def write_single_media(self, attrs, content):
+            width = attrs.get('width', 66.6)
+            side = round((100 - width) * 6 / 100)
+            middle = 12 - side * 2
+            self.html += '<div class="row mb-4">\n' \
+                    f'<div class="col-{side}"></div>\n' \
+                    f'<div class="col-{middle}">\n'
+            self.write(content)
+            self.html += '</div>\n' \
+                    f'<div class="col-{side}"></div>\n' \
+                    '</div>\n'
+
+        def write_media(self, attrs, content):
+            media_id = attrs.get('id', 'unknown-id')
+            alt = attrs.get('alt', 'unknown ')
+            src = '/rest/attachment'
+            if self.issue_id is not None:
+                src += f'/{self.issue_id}'
+            src += f'/{media_id}'
+            self.html += f'<img class="img-fluid" src="{src}" alt="{alt}" />'
+
         def write_element(self, t, attrs, content):
             if t == 'paragraph':
                 self.write_paragraph(attrs, content)
@@ -72,6 +128,20 @@ class Document(object):
                 self.write_date(attrs, content)
             elif t == 'heading':
                 self.write_heading(attrs, content)
+            elif t == 'mention':
+                self.write_mention(attrs, content)
+            elif t == 'inlineCard':
+                self.write_issue_link(attrs, content)
+            elif t == 'bulletList':
+                self.write_bullet_list(attrs, content)
+            elif t == 'orderedList':
+                self.write_ordered_list(attrs, content)
+            elif t == 'listItem':
+                self.write_list_item(attrs, content)
+            elif t == 'mediaSingle':
+                self.write_single_media(attrs, content)
+            elif t == 'media':
+                self.write_media(attrs, content)
             else:
                 _log.error(f"Unknown element type '{t}'!")
 

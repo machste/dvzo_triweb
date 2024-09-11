@@ -101,6 +101,7 @@ class Issue(object):
         self._engine = Issue.Engine.DEFAULT
         self._summary = '(Kein Titel)'
         self.description = None
+        self.attachment_ids = []
         self.workers = []
         self._created = None
         self._duedate = None
@@ -238,6 +239,12 @@ class Issue(object):
             description = fields['description']
             if description is not None:
                 self.description = Document.load(description)
+        if 'attachment' in fields:
+            attachments = fields['attachment']
+            if attachments is not None:
+                for attachment in attachments:
+                    if 'id' in attachment:
+                        self.attachment_ids.append(attachment['id'])
         return self
 
     def __json__(self, request=None):

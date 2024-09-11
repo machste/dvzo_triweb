@@ -12,7 +12,7 @@
   {% if issue.description is none %}
     <p><em>Keine Beschreibung vorhanden!</em></p>
   {% else %}
-    {{ issue.description.write('html', header_offset=1) | safe }}
+    {{ issue.description.write('html', header_offset=1, issue_id=issue.id) | safe }}
   {% endif %}
 
 </div>

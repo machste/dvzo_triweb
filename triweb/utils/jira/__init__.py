@@ -2,9 +2,12 @@ import logging
 import requests
 import time
 
+from threading import RLock
 from requests.auth import HTTPBasicAuth
 
 from triweb.utils.jira.issue import Issue
+from triweb.utils.jira.attachment import Attachment
+from triweb.utils.decorators import lock
 from triweb.errors import GeneralError
 
 _log = logging.getLogger(__name__)
@@ -26,6 +29,8 @@ class Jira(object):
         'done': 10028
     }
 
+    GLOBAL_LOCK = RLock()
+
     def __init__(self, url):
         self.url = url
         self.headers = { 'Accept': 'application/json' }
@@ -38,32 +43,90 @@ class Jira(object):
     def set_cache(self, cache):
         self.cache = cache
 
-    def request(self, path):
+    def request(self, path, json=True):
         url = self.url + path
         res = requests.request('GET', url=url, auth=self.auth,
                 headers=self.headers)
         if not res.ok:
             _log.error(f"Request '{url}' failed!")
             raise self.Error(f"Anfrage bei '{self.url}' hat fehlgeschlagen!")
-        return res.json()
+        if json:
+            return res.json()
+        return res
 
-    def get_issue(self, id, max_age=None):
+    @lock(GLOBAL_LOCK)
+    def get_issue_from_cache(self, id_or_key, max_age=None):
+        if self.cache is None:
+            return None
+        def compare_issue(issue):
+            if not isinstance(issue, Issue):
+                return False
+            if issue.id == id_or_key or issue.key == id_or_key:
+                _log.debug(f"Request for issue #{issue.id} hit cache.")
+                return True
+            return False
+        return self.cache.search_category('issues', compare_issue, max_age)
+
+    @lock(GLOBAL_LOCK)
+    def get_issue(self, id_or_key, max_age=None):
         # Check the issue cache
-        if self.cache is not None:
-            issue = self.cache.get_data('issues', id, max_age)
+        issue = self.get_issue_from_cache(id_or_key, max_age)
         if issue is not None:
-            _log.debug(f"Request for issue #{id} hit cache.")
             return issue
         # Otherwise get the issue from Jira
-        path = f'/rest/api/3/issue/{id}'
+        path = f'/rest/api/3/issue/{id_or_key}'
         js_issue = self.request(path)
         issue = Issue.from_jira_js(js_issue)
-        _log.debug(f'Got issue {issue}')
+        _log.debug(f'Got issue: {issue}')
         # Update cache
         if self.cache is not None:
-            self.cache.update_data('issues', id, issue)
+            self.cache.update_data('issues', issue.id, issue)
         return issue
 
+    @lock(GLOBAL_LOCK)
+    def get_attachment_from_cache(self, id, max_age=None):
+        if self.cache is None:
+            return None
+        def compare_att(att):
+            if not isinstance(att, Attachment):
+                return False
+            if att.id == id or att.media_id == id:
+                _log.debug(f"Request for attachment #{att.id} hit cache.")
+                return True
+            return False
+        return self.cache.search_category('attachments', compare_att, max_age)
+
+    @lock(GLOBAL_LOCK)
+    def get_attachment(self, id, max_age=None):
+        # Check the attachment cache
+        att = self.get_attachment_from_cache(id, max_age)
+        if att is not None:
+            return att
+        # Otherwise get the attachment from Jira
+        path = f'/rest/api/3/attachment/content/{id}'
+        result = self.request(path, False)
+        att = Attachment(id)
+        att.populate(result)
+        _log.debug(f'Got attachment: {att}')
+        # Update cache
+        if self.cache is not None:
+            self.cache.update_data('attachments', att.id, att)
+        return att
+
+    @lock(GLOBAL_LOCK)
+    def get_attachments(self, id_or_key, max_age=None):
+        atts = []
+        issue = self.get_issue(id_or_key, max_age)
+        if issue is None:
+            return atts
+        for att_id in issue.attachment_ids:
+            att = self.get_attachment(att_id, max_age)
+            if att is None:
+                continue
+            atts.append(att)
+        return atts
+
+    @lock(GLOBAL_LOCK)
     def get_issues(self, list_name, max_age=None):
         # Check list name
         try:
@@ -116,6 +179,23 @@ class IssueCache(object):
             del cat_data[key]
             return None
         return d.data
+
+    def search_category(self, category, compare_cb, max_age=None):
+        max_age = max_age if max_age is not None else self.max_age
+        cat_data = self.data.get(category, None)
+        if cat_data is None:
+            return None
+        found_key, found_data = None, None
+        for key, data in cat_data.items():
+            if compare_cb(data.data):
+                found_key, found_data = key, data
+                break
+        if found_key is None:
+            return None
+        if time.time() - found_data.timestamp > max_age:
+            del cat_data[found_key]
+            return None
+        return found_data.data
 
     def update_data(self, category, key, data):
         cat_data = self.data.get(category, None)
