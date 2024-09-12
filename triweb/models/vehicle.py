@@ -1,7 +1,9 @@
-from sqlalchemy import Column
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy import Integer, Text
+from sqlalchemy.orm import relationship
 
 from triweb.models.meta import Base
+from triweb.models.vehicle_manager import VehicleManager
 
 
 class Vehicle(Base):
@@ -13,6 +15,9 @@ class Vehicle(Base):
     token = Column(Text, unique=True)
     given_name = Column(Text)
     short_name = Column(Text)
+    manager_id = Column(ForeignKey(VehicleManager.id))
+    # Relations to other tables
+    manager = relationship(VehicleManager, back_populates='vehicles')
 
     @property
     def display_name(self):

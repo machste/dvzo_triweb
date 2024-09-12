@@ -2,13 +2,6 @@ from triweb.models.user import User
 from triweb.models.vehicle import Vehicle
 from triweb.models.workday import Workday
 
-def get_user_roles(dbsession):
-    # Currently this is hardcoded
-    return {
-        'basic': 'Benutzer',
-        'manager': 'Leiter',
-        'admin': 'Administrator'
-    }
 
 def get_manager_display_names(dbsession, limit=25):
     display_names = {}

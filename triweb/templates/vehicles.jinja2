@@ -1,0 +1,44 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+<div class="container content">
+  <h1>Fahrzeuge Verwalten</h1>
+  {% if vehicles | count > 0 %}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <caption>Liste aller Fahrzeuge</caption>
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col"><abbr title="National Vehicle Register">NVR</abbr></th>
+            <th scope="col">Götti</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for vehicle in vehicles %}
+            <tr onclick="window.location='{{ request.route_url('vehicle_edit', id=loop.index) }}'">
+              <th scope="row">{{ loop.index }}</th>
+              <td>{{ vehicle.display_name }}</td>
+              <td>{{ vehicle.nvr | d('', True) }}</td>
+              <td class="text-nowrap">{{ vehicle.manager.display_name if vehicle.manager is not none }}</td>
+              <td class="text-nowrap"></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-warning d-flex align-items-center my-4" role="alert">
+      <i class="bi bi-exclamation-triangle-fill flex-shrink-0 alert-icon"></i>
+      <div>
+        Es wurden keine Fahrzeuge gefunden!
+      </div>
+    </div>
+  {% endif %}
+  {% if request.has_permission('administrate') %}
+    <a class="btn btn-primary" href="{{ request.route_url('vehicle_add') }}">Fahrzeug hinzufügen</a>
+  {% endif %}
+</div>
+{% endblock content %}

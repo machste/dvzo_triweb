@@ -12,6 +12,7 @@
             <th scope="col">#</th>
             <th scope="col">Vorname</th>
             <th scope="col">Name</th>
+            <th scope="col">Funktion</th>
             <th scope="col">E-Mail Adresse</th>
             <th scope="col">Zuletzt angemeldet</th>
           </tr>
@@ -20,8 +21,9 @@
           {% for user in users %}
             <tr {% if request.has_permission('administrate') %}onclick="window.location='{{ request.route_url('user_edit', id=loop.index) }}'"{% endif %}>
               <th scope="row">{{ loop.index }}</th>
-              <td>{{ user.firstname }}</td>
-              <td>{{ user.lastname }}</td>
+              <td class="text-nowrap">{{ user.firstname }}</td>
+              <td class="text-nowrap">{{ user.lastname }}</td>
+              <td class="text-nowrap">{{ roles.get(user.role, '') }}</td>
               <td>{{ user.email }}</td>
               <td class="text-nowrap"><span convert="to_datetime">{{ user.last_login }}</span></td>
             </tr>

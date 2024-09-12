@@ -1,0 +1,46 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+<div class="container content">
+  <h1>Lok-Göttis Verwalten</h1>
+  {% if vehicle_managers | count > 0 %}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <caption>Liste aller Lok-Göttis</caption>
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Farbe</th>
+            <th scope="col">Fahrzeug</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for vm in vehicle_managers %}
+            <tr {% if request.has_permission('administrate') %}onclick="window.location='{{ request.route_url('vehicle_manager_edit', id=loop.index) }}'"{% endif %}>
+              <th scope="row">{{ loop.index }}</th>
+              <td class="text-nowarp">{{ vm.user.display_name }}</td>
+              <td><span class="badge" style="width:100px; height:20px; background-color:{{ vm.badge_color }}"> </span></td>
+              <td>
+                {% for vehicle in vm.vehicles %}
+                  <span class="text-nowarp">{{ vehicle.display_name}}</span>{{ ', ' if not loop.last }}
+                {% endfor %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-warning d-flex align-items-center my-4" role="alert">
+      <i class="bi bi-exclamation-triangle-fill flex-shrink-0 alert-icon"></i>
+      <div>
+        Es wurden keine Lok-Göttis gefunden!
+      </div>
+    </div>
+  {% endif %}
+  {% if request.has_permission('administrate') %}
+    <a class="btn btn-primary" href="{{ request.route_url('vehicle_manager_add') }}">Lok-Götti hinzufügen</a>
+  {% endif %}
+</div>
+{% endblock content %}

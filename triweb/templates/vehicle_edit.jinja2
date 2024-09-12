@@ -1,0 +1,62 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+<div class="container content">
+  <h1>Fahrzeug {{ 'Bearbeiten' if action == 'edit' else 'Hinzufügen' }}</h1>
+
+  <form id="form" name="{{ form.name }}" method="post" novalidate>
+    <div class="mb-2">
+      <label class="form-label" for="vname">Name</label>
+      <input class="form-control{{ form.vname.get_valid_cls() | prefix(' ') }}" id="vname" name="vname" value="{{ form.vname.value }}" />
+      <div class="invalid-feedback">{{ form.vname.err_msg }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="number">Nummer</label>
+      <input class="form-control{{ form.number.get_valid_cls() | prefix(' ') }}" id="number" name="number" value="{{ form.number.value }}" />
+      <div class="invalid-feedback">{{ form.number.err_msg }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="given_name">Taufname</label>
+      <input class="form-control{{ form.given_name.get_valid_cls() | prefix(' ') }}" id="given_name" name="given_name" value="{{ form.given_name.value }}" />
+      <div class="invalid-feedback">{{ form.given_name.err_msg }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="nvr">National Vehicle Register (NVR)</label>
+      <input class="form-control{{ form.nvr.get_valid_cls() | prefix(' ') }}" id="nvr" name="nvr" value="{{ form.nvr.value }}" />
+      <div class="invalid-feedback">{{ form.nvr.err_msg }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="manager_id">Götti</label>
+      <select class="form-select" id="manager_id" name="manager_id">
+        {% for id, dname in managers.items() %}
+          <option {{ 'selected' if form.manager_id.value == id }} value="{{ id }}">{{ dname }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="short_name">Kurzname</label>
+      <input class="form-control{{ form.short_name.get_valid_cls() | prefix(' ') }}" id="short_name" name="short_name" value="{{ form.short_name.value }}" />
+      <div class="invalid-feedback">{{ form.short_name.err_msg }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="token">Token</label>
+      <input class="form-control{{ form.token.get_valid_cls() | prefix(' ') }}" id="token" name="token" value="{{ form.token.value }}" />
+      <div class="invalid-feedback">{{ form.token.err_msg }}</div>
+    </div>
+    <div class="mt-4">
+      <button class="btn btn-primary" type="submit" id="form-save-btn" name="form.submitted" value="save" {{ 'disabled' if action == 'edit' }}>Speichern</button>
+      {% if action == 'edit' %}
+        {% if form.validated %}
+          <a class="btn btn-secondary" href="{{ request.url }}">Verwerfen</a>
+        {% else %}
+          <button class="btn btn-secondary" type="reset" id="form-reset-btn" disabled>Zurücksetzen</button>
+        {% endif %}
+      {% endif %}
+      <a class="btn btn-secondary ms-4" href="{{ request.route_url('vehicles') }}">Zurück</a>
+    </div>
+  </form>
+</div>
+{% if action == 'edit' %}
+  <script src="{{ request.static_url('triweb:static/js/form_utils.js') }}"></script>
+{% endif %}
+{% endblock content %}

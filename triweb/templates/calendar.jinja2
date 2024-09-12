@@ -24,9 +24,13 @@
   <div class="card-body">
     <div class="workday-badges">
       {% if workday.vehicle is not none %}
-        <span class="badge badge-lok lok-godfather-1">{{ workday.vehicle.short_name or workday.vehicle.name }}</span>
+        {% if workday.vehicle.manager is not none %}
+          <span class="badge" style="background-color:{{ workday.vehicle.manager.badge_color }};">{{ workday.vehicle.short_name or workday.vehicle.name }}</span>
+        {% else %}
+          <span class="badge badge-lok">{{ workday.vehicle.short_name or workday.vehicle.name }}</span>
+        {% endif %}
       {% else %}
-        <div class="workday-badges"><span class="badge badge-workshop">Werkstatt</span></div>
+        <span class="badge badge-workshop">Werkstatt</span>
       {% endif %}
     </div>
     <div class="card-title">{{ workday.title }}</div>

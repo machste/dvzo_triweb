@@ -10,4 +10,4 @@ class Users(Private):
             renderer='users.jinja2')
     def view(self):
         users = self.dbsession.query(User).all()
-        return dict(users=users)
+        return dict(users=users, roles=User.ROLES)

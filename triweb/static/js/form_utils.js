@@ -5,8 +5,41 @@ const form_reset_btn = document.getElementById("form-reset-btn");
 
 function save_original_values() {
     for (const el of form_inputs) {
-        el.orig_value = el.value;
+        if (el.nodeName == "SELECT" && el.multiple) {
+            el.orig_value = []
+            for (const option of el.selectedOptions) {
+                el.orig_value.push(option.index)
+            }
+        } else {
+            el.orig_value = el.value;
+        }
     }
+}
+
+function have_values_changed() {
+    let changed = false;
+    for (const el of form_inputs) {
+        if (el.nodeName == "SELECT" && el.multiple) {
+            if (el.selectedOptions.length != el.orig_value.length) {
+                changed = true;
+            } else {
+                for (let i = 0; i < el.orig_value.length; i++) {
+                    if (el.orig_value[0] !== el.selectedOptions[0].index);
+                }
+                for (const option of el.selectedOptions) {
+                    el.orig_value.push(option.index);
+                }
+            }
+        } else {
+            if (el.orig_value !== el.value) {
+                changed = true;
+            }
+        }
+        if (changed) {
+            break;
+        }
+    }
+    return changed;
 }
 
 function disable_form_buttons(state=true) {
@@ -15,14 +48,7 @@ function disable_form_buttons(state=true) {
 }
 
 function update_form_buttons() {
-    let orig_state = true;
-    for (const el of form_inputs) {
-        if (el.orig_value !== el.value) {
-            orig_state = false;
-            break;
-        }
-    }
-    disable_form_buttons(orig_state);
+    disable_form_buttons(!have_values_changed());
 }
 
 function toggle_pwd_input(n=1) {

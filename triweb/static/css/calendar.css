@@ -62,26 +62,6 @@
   background-color: #c55c20;
 }
 
-.badge-lok.lok-godfather-1 {
-  background-color: #6AA84F;
-}
-
-.badge-lok.lok-godfather-2 {
-  background-color: #F1C232;
-}
-
-.badge-lok.lok-godfather-3 {
-  background-color: #A64D79;
-}
-
-.badge-lok.lok-godfather-4 {
-  background-color: #eb2b2b;
-}
-
-.badge-lok.lok-godfather-5 {
-  background-color: #2bc5eb;
-}
-
 .card.cal-workday .card-header .workday-cook:after {
   content: '';
   display: block;

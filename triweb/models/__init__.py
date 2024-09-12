@@ -8,6 +8,7 @@ import zope.sqlalchemy
 from .user import User  # flake8: noqa
 from .workday import Workday # flake8: noqa
 from .vehicle import Vehicle # flake8: noqa
+from .vehicle_manager import VehicleManager # flake8: noqa
 
 # Run ``configure_mappers`` after defining all of the models to ensure
 # all relationships can be setup.

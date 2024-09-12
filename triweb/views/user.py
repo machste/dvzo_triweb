@@ -6,7 +6,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from triweb.views import Private
 from triweb.models.user import User
 from triweb.utils.form import Form
-from triweb.utils.db import get_user_roles
 from triweb.utils.toast import Toast
 from triweb.errors import DatabaseError
 
@@ -19,7 +18,7 @@ class UserView(Private):
         mappings = {}
         mappings['action'] = 'add'
         user = User()
-        mappings['roles'] = get_user_roles(self.dbsession)
+        mappings['roles'] = User.ROLES
         form = UserForm('user_add')
         if 'form.submitted' in self.request.params:
             if self.validate(form):
@@ -40,7 +39,7 @@ class UserView(Private):
         user = self.dbsession.get(User, user_id)
         if user is None:
             raise DatabaseError(f"Benutzer mit ID: '{user_id}' nicht gefunden!")
-        mappings['roles'] = get_user_roles(self.dbsession)
+        mappings['roles'] = User.ROLES
         form = UserForm('user_edit')
         if 'form.submitted' in self.request.params:
             if self.validate(form, user):

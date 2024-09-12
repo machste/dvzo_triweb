@@ -44,10 +44,12 @@
               <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" id="admin" href="#" role="button" data-bs-toggle="dropdown">Verwalten</a>
                   <ul class="dropdown-menu">
-                    {% if request.has_permission('administrate') %}
-                      <li><a class="dropdown-item" href="{{ request.route_url('users') }}">Benutzer</a></li>
-                    {% endif %}
                     <li><a class="dropdown-item" href="{{ request.route_url('workdays') }}">Arbeitstage</a></li>
+                    {% if request.has_permission('administrate') %}
+                      <li><a class="dropdown-item" href="{{ request.route_url('vehicles') }}">Fahrzeuge</a></li>
+                      <li><a class="dropdown-item" href="{{ request.route_url('users') }}">Benutzer</a></li>
+                      <li><a class="dropdown-item" href="{{ request.route_url('vehicle_managers') }}">Lok-Göttis</a></li>
+                    {% endif %}
                   </ul>
               </li>
             {% endif %}

@@ -5,6 +5,7 @@ from triweb.models.meta import Base
 
 
 class User(Base):
+
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     email = Column(Text, nullable=False, unique=True)
@@ -14,6 +15,13 @@ class User(Base):
     passwd_hash = Column(Text)
     role = Column(Text, nullable=False, server_default="basic")
     last_login = Column(DateTime)
+
+    ROLES = {
+        'basic': 'Benutzer',
+        'team_leader': 'Einsatzleiter',
+        'manager': 'Ressortleiter',
+        'admin': 'Administrator'
+    }
 
     @property
     def display_name(self):
