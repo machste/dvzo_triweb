@@ -2,8 +2,9 @@
 
 {% block content %}
 <div class="container content">
-  <h1>Benutzer Bearbeiten</h1>
-  <form id="form" name="user_edit" method="post" novalidate>
+  <h1>Benutzer {{ 'Bearbeiten' if action == 'edit' else 'Hinzufügen' }}</h1>
+
+  <form id="form" name="{{ form.name }}" method="post" novalidate>
     <div class="mb-2">
       <label class="form-label" for="firstname">Vorname</label>
       <input class="form-control{{ form.firstname.get_valid_cls() | prefix(' ') }}" id="firstname" name="firstname" value="{{ form.firstname.value }}" autocomplete="off"/>
@@ -27,7 +28,7 @@
     <div class="mb-2">
       <label class="form-label" for="role" >Funktion</label>
       <select class="form-select{{ form.email.get_valid_cls() | prefix(' ') }}" id="role" name="role">
-        {% for role, role_desc in user_roles.items() %}
+        {% for role, role_desc in roles.items() %}
           <option {{ 'selected' if form.role.value == role }} value="{{ role }}">{{ role_desc }}</option>
         {% endfor %}
       </select>
@@ -59,11 +60,13 @@
       </div>
     </div>
     <div class="mt-4">
-      <button class="btn btn-primary" type="submit" id="form-save-btn" name="form.submitted" value="form" disabled>Speichern</button>
-      {% if form.validated %}
-        <a class="btn btn-secondary" href="{{ request.url }}">Verwerfen</a>
-      {% else %}
-        <button class="btn btn-secondary" type="reset" id="form-reset-btn" disabled>Zurücksetzen</button>
+      <button class="btn btn-primary" type="submit" id="form-save-btn" name="form.submitted" value="save" {{ 'disabled' if action == 'edit' }}>Speichern</button>
+      {% if action == 'edit' %}
+        {% if form.validated %}
+          <a class="btn btn-secondary" href="{{ request.url }}">Verwerfen</a>
+        {% else %}
+          <button class="btn btn-secondary" type="reset" id="form-reset-btn" disabled>Zurücksetzen</button>
+        {% endif %}
       {% endif %}
       <a class="btn btn-secondary ms-4" href="{{ request.route_url('users') }}">Zurück</a>
     </div>
