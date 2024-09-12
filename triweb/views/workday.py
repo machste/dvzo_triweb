@@ -14,15 +14,14 @@ from triweb.errors import DatabaseError
 class WorkdayView(View):
 
     @view_config(route_name='workday_add', permission='manage',
-            renderer='workday.jinja2')
+            renderer='workday_edit.jinja2')
     def view_add(self):
         mappings = {}
         mappings['action'] = 'add'
         workday = Workday()
         mappings['managers'] = get_manager_display_names(self.dbsession)
         mappings['engines'] = get_engine_display_names(self.dbsession)
-        form = WorkdayForm('workday_add', ['title', 'date', 'start_time',
-                'end_time', 'description', 'manager_id', 'vehicle_id', 'cook'])
+        form = WorkdayForm('workday_add')
         if 'form.submitted' in self.request.params:
             if form.validate(self.request.params):
                 form.copy_to(workday)
@@ -43,7 +42,7 @@ class WorkdayView(View):
         return mappings
 
     @view_config(route_name='workday_edit', permission='manage',
-            renderer='workday.jinja2')
+            renderer='workday_edit.jinja2')
     def view_edit(self):
         mappings = {}
         mappings['action'] = 'edit'
@@ -53,8 +52,7 @@ class WorkdayView(View):
             raise DatabaseError(f"Arbeitstag mit ID: '{workday_id}' nicht gefunden!")
         mappings['managers'] = get_manager_display_names(self.dbsession)
         mappings['engines'] = get_engine_display_names(self.dbsession)
-        form = WorkdayForm('workday_add', ['title', 'date', 'start_time',
-                'end_time', 'description', 'manager_id', 'vehicle_id', 'cook'])
+        form = WorkdayForm('workday_edit')
         if 'form.submitted' in self.request.params:
             if form.validate(self.request.params):
                 form.copy_to(workday)
@@ -80,6 +78,20 @@ class WorkdayView(View):
 
 
 class WorkdayForm(Form):
+
+    FIELDS = [
+        'title',
+        'date',
+        'start_time',
+        'end_time',
+        'description',
+        'manager_id',
+        'vehicle_id',
+        'cook'
+    ]
+
+    def __init__(self, name):
+        super().__init__(name, self.FIELDS)
 
     def copy_from(self, model):
         self.title.value = model.title or ''

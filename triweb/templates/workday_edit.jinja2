@@ -4,7 +4,7 @@
 <div class="container content">
   <h1>Arbeitstag {{ 'Bearbeiten' if action == 'edit' else 'Hinzufügen' }}</h1>
 
-  <form id="form" novalidate name="workday_add" method="post">
+  <form id="form" name="{{ form.name }}" method="post" novalidate>
     <div class="mb-2">
       <label class="form-label" for="title">Titel</label>
       <input class="form-control{{ form.title.get_valid_cls() | prefix(' ') }}" id="title" name="title" value="{{ form.title.value }}" />
