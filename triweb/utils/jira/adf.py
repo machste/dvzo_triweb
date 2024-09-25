@@ -70,10 +70,9 @@ class Document(object):
             }
         }
 
-        def __init__(self, header_offset=0, issue_id=None):
+        def __init__(self, header_offset=0):
             self.html = ''
             self.header_offset = header_offset
-            self.issue_id = issue_id
 
         def write_styles(self):
             if len(self.DEF_CSS) == 0:
@@ -152,10 +151,7 @@ class Document(object):
         def write_media(self, attrs, content):
             media_id = attrs.get('id', 'unknown-id')
             alt = attrs.get('alt', 'unknown ')
-            src = '/rest/attachment'
-            if self.issue_id is not None:
-                src += f'/{self.issue_id}'
-            src += f'/{media_id}'
+            src = f'/rest/attachment/{media_id}'
             self.html += f'<img class="img-fluid" src="{src}" alt="{alt}" />'
 
         def write_table_cell(self, attrs, content, header=False):

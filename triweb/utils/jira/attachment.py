@@ -15,11 +15,16 @@ class Attachment(object):
         self.media_id = None
         self.name = None
         self.content_type = None
+        self._data_url = None
         self.data = None
 
-    def populate(self, http_response):
-        # Get additional info of the attachment (e.g. UUID, content type, ...)
-        url = urlparse(http_response.url)
+    @property
+    def data_url(self):
+        return self._data_url
+
+    @data_url.setter
+    def data_url(self, data_url):
+        url = urlparse(data_url)
         uuid_match = re.search(self.UUID_REGEX, url.path)
         if uuid_match is not None:
             self.media_id = uuid_match[0]
@@ -29,6 +34,12 @@ class Attachment(object):
         names = parse_qs(url.query).get('name')
         if names is not None:
             self.name = names[0]
+        self._data_url = data_url
+
+    def has_data(self):
+        return self.data is not None
+
+    def populate(self, http_response):
         # Get content type
         self.content_type = http_response.headers.get('Content-Type')
         # Get content

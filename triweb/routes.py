@@ -33,4 +33,4 @@ def includeme(config):
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     config.add_route('rest.issues', '/rest/issues/{list_name}')
-    config.add_route('rest.attachment', '/rest/attachment/{issue_id}/{id}')
+    config.add_route('rest.attachment', '/rest/attachment/{id}')

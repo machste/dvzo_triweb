@@ -31,9 +31,9 @@ class Jira(object):
 
     GLOBAL_LOCK = RLock()
 
-    def __init__(self, url):
+    def __init__(self, url, session=None):
         self.url = url
-        self.headers = { 'Accept': 'application/json' }
+        self.session = session or requests.sessions.Session()
         self.auth = None
         self.cache = None
 
@@ -43,19 +43,21 @@ class Jira(object):
     def set_cache(self, cache):
         self.cache = cache
 
-    def request(self, path, json=True):
+    def request(self, path, headers=None, redirects=True):
         url = self.url + path
-        res = requests.request('GET', url=url, auth=self.auth,
-                headers=self.headers)
+        res = self.session.request('GET', url=url, auth=self.auth,
+                headers=headers, allow_redirects=redirects)
         if not res.ok:
             _log.error(f"Request '{url}' failed!")
             raise self.Error(f"Anfrage bei '{self.url}' hat fehlgeschlagen!")
-        if json:
-            return res.json()
         return res
 
-    @lock(GLOBAL_LOCK)
-    def get_issue_from_cache(self, id_or_key, max_age=None):
+    def request_json(self, path):
+        headers = { 'Accept': 'application/json' }
+        res = self.request(path, headers=headers)
+        return res.json()
+
+    def _get_issue_from_cache(self, id_or_key, max_age=None):
         if self.cache is None:
             return None
         def compare_issue(issue):
@@ -70,61 +72,65 @@ class Jira(object):
     @lock(GLOBAL_LOCK)
     def get_issue(self, id_or_key, max_age=None):
         # Check the issue cache
-        issue = self.get_issue_from_cache(id_or_key, max_age)
+        issue = self._get_issue_from_cache(id_or_key, max_age)
         if issue is not None:
             return issue
         # Otherwise get the issue from Jira
         path = f'/rest/api/3/issue/{id_or_key}'
-        js_issue = self.request(path)
+        js_issue = self.request_json(path)
         issue = Issue.from_jira_js(js_issue)
         _log.debug(f'Got issue: {issue}')
+        # Get meta data of attachments
+        for att in issue.attachments:
+            self.get_attachment(att, data=False)
         # Update cache
         if self.cache is not None:
             self.cache.update_data('issues', issue.id, issue)
         return issue
 
-    @lock(GLOBAL_LOCK)
-    def get_attachment_from_cache(self, id, max_age=None):
+    def _get_attachment_from_cache(self, id, max_age=None):
         if self.cache is None:
             return None
         def compare_att(att):
             if not isinstance(att, Attachment):
                 return False
             if att.id == id or att.media_id == id:
-                _log.debug(f"Request for attachment #{att.id} hit cache.")
                 return True
             return False
         return self.cache.search_category('attachments', compare_att, max_age)
 
     @lock(GLOBAL_LOCK)
-    def get_attachment(self, id, max_age=None):
+    def get_attachment(self, id_or_att, data=True, max_age=None):
+        if isinstance(id_or_att, Attachment):
+            att = id_or_att
+        else:
+            att = Attachment(id_or_att)
+        update_cache = False
         # Check the attachment cache
-        att = self.get_attachment_from_cache(id, max_age)
-        if att is not None:
-            return att
-        # Otherwise get the attachment from Jira
-        path = f'/rest/api/3/attachment/content/{id}'
-        result = self.request(path, False)
-        att = Attachment(id)
-        att.populate(result)
-        _log.debug(f'Got attachment: {att}')
+        cached_att = self._get_attachment_from_cache(att.id, max_age)
+        if cached_att is None:
+            update_cache = True
+            # Get the attachment from Jira
+            path = f'/rest/api/3/attachment/content/{att.id}'
+            res = self.request(path, redirects=False)
+            if not res.is_redirect:
+                raise self.Error(f"Die Media-ID vom Anhang #{att.id} kann nicht geladen werden!")
+            att.data_url = res.headers['Location']
+            _log.debug(f'Got attachment: {att}')
+        else:
+            att = cached_att
+        if data and not att.has_data():
+            update_cache = True
+            # Get the acutal data from the attachment
+            res = self.session.get(att.data_url)
+            att.populate(res)
+            _log.debug(f'Got file: {att.name} ({att.content_type})')
         # Update cache
-        if self.cache is not None:
+        if update_cache:
             self.cache.update_data('attachments', att.id, att)
+        else:
+            _log.debug(f"Request for attachment #{att.id} hit cache.")
         return att
-
-    @lock(GLOBAL_LOCK)
-    def get_attachments(self, id_or_key, max_age=None):
-        atts = []
-        issue = self.get_issue(id_or_key, max_age)
-        if issue is None:
-            return atts
-        for att_id in issue.attachment_ids:
-            att = self.get_attachment(att_id, max_age)
-            if att is None:
-                continue
-            atts.append(att)
-        return atts
 
     @lock(GLOBAL_LOCK)
     def get_issues(self, list_name, max_age=None):
@@ -143,7 +149,7 @@ class Jira(object):
         # Otherwise get the issues from Jira
         issues = []
         path = f'/rest/api/3/search?&fields=issuetype,status,priority,summary,created,duedate,resolutiondate,customfield_10058,customfield_10067,customfield_10069&jql=filter%3D{filter_id}'
-        js = self.request(path)
+        js = self.request_json(path)
         js_issues = js['issues']
         _log.info(f"Get issues '{list_name}' (id: {filter_id}) ...")
         for js_issue in js_issues:
@@ -218,10 +224,11 @@ def install_jira(config):
     url = settings.get('jira.url', 'https://atlassian.net')
     user = settings.get('jira.user')
     token = settings.get('jira.token')
+    http_session = requests.sessions.Session()
     issue_cache = IssueCache()
     def jira_factory(request):
         _log.debug('Create Jira API')
-        jira = Jira(url)
+        jira = Jira(url, http_session)
         jira.set_cache(issue_cache)
         if user is not None and token is not None:
             jira.set_auth(user, token)

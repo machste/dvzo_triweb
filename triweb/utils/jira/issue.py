@@ -2,6 +2,7 @@ from enum import Enum
 from datetime import date
 
 from triweb.utils.jira.adf import Document
+from triweb.utils.jira.attachment import Attachment
 
 class EnumValue(object):
 
@@ -101,7 +102,7 @@ class Issue(object):
         self._engine = Issue.Engine.DEFAULT
         self._summary = '(Kein Titel)'
         self.description = None
-        self.attachment_ids = []
+        self.attachments = []
         self.workers = []
         self._created = None
         self._duedate = None
@@ -242,9 +243,12 @@ class Issue(object):
         if 'attachment' in fields:
             attachments = fields['attachment']
             if attachments is not None:
-                for attachment in attachments:
-                    if 'id' in attachment:
-                        self.attachment_ids.append(attachment['id'])
+                for a in attachments:
+                    if 'id' not in a:
+                        continue
+                    attachment = Attachment(a['id'])
+                    attachment.content_type = a.get('mimeType')
+                    self.attachments.append(attachment)
         return self
 
     def __json__(self, request=None):
