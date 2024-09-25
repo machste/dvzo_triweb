@@ -270,6 +270,8 @@ class Document(object):
                 text = self.mark_text_link(attrs, text)
             elif t == 'strong':
                 text = f'<strong>{text}</strong>'
+            elif t == 'em':
+                text = f'<em>{text}</em>'
             else:
                 _log.error(f"Unknown text mark type '{t}'!")
             return text
