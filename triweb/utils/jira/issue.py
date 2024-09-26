@@ -236,10 +236,6 @@ class Issue(object):
                     if len(worker_name) == 0:
                         continue
                     self.workers.append(Worker(worker_name))
-        if 'description' in fields:
-            description = fields['description']
-            if description is not None:
-                self.description = Document.load(description)
         if 'attachment' in fields:
             attachments = fields['attachment']
             if attachments is not None:
@@ -249,6 +245,11 @@ class Issue(object):
                     attachment = Attachment(a['id'])
                     attachment.content_type = a.get('mimeType')
                     self.attachments.append(attachment)
+        if 'description' in fields:
+            description = fields['description']
+            if description is not None:
+                self.description = Document.load(description)
+                self.description.attachments = self.attachments
         return self
 
     def __json__(self, request=None):
