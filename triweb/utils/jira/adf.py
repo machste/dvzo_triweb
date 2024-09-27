@@ -207,7 +207,8 @@ class Document(object):
             self.html += '</tbody>\n'
 
         def write_table(self, doc, attrs, content):
-            self.html += '<table class="table mb-4">\n'
+            self.html += '<div class="table-responsive">\n' \
+                    '<table class="table mb-4">\n'
             first_row = None
             header = False
             # Get first row of the table ...
@@ -224,7 +225,7 @@ class Document(object):
             else:
                 # ... without header
                 self._write_table_rows(doc, content)
-            self.html += '</table>\n'
+            self.html += '</table>\n</div>\n'
 
         def write_panel(self, doc, attrs, content):
             panel_type = attrs.get('panelType')
