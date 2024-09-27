@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="{{ request.locale_name }}">
+<head>
+  <title>{{ title | default('DVZO Triebfahrzeuge') }}</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="application-name" content="DVZO Triebfahrzeuge">
+  <link rel="manifest" href="{{ request.static_url('triweb:static/assets/triweb.webmanifest') }}">
+  <link rel="icon" type="image/png" href="{{ request.static_url('triweb:static/imgs/favicon.png') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{{ request.static_url('triweb:static/css/default.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  <script src="{{ request.static_url('triweb:static/js/main.js') }}"></script>
+</head>
+<body>
+  <div class="container content">
+
+    <h1>Test Page</h1>
+
+    <form id="form" name="{{ form.name }}" method="post" novalidate>
+      <div class="mb-2">
+        <label class="form-label" for="text">Text</label>
+        <input class="form-control{{ form.text.get_valid_cls() | prefix(' ')  }}" id="text" name="text" value="{{ form.text.value }}" autocomplete="off" />
+        <div class="invalid-feedback">{{ form.text.err_msg }}</div>
+      </div>
+      <div class="mb-2">
+        <label class="form-label" for="role" >Funktion</label>
+        <select multiple class="form-select{{ form.roles.get_valid_cls() | prefix(' ') }}" id="roles" name="roles">
+          {% for role, role_desc in roles.items() %}
+            <option {{ 'selected' if role in form.roles.value }} value="{{ role }}">{{ role_desc }}</option>
+          {% endfor %}
+        </select>
+        <div class="invalid-feedback">{{ form.roles.err_msg }}</div>
+      </div>
+    <div class="mt-4">
+      <button class="btn btn-primary" type="submit" id="form-save-btn" name="form.submitted" value="save" {{ 'disabled' if action == 'edit' }}>Speichern</button>
+      {% if action == 'edit' %}
+        {% if form.validated %}
+          <a class="btn btn-secondary" href="{{ request.url }}">Verwerfen</a>
+        {% else %}
+          <button class="btn btn-secondary" type="reset" id="form-reset-btn" disabled>Zurücksetzen</button>
+        {% endif %}
+      {% endif %}
+      <a class="btn btn-secondary ms-4" href="{{ request.route_url('test') }}">Zurück</a>
+    </div>
+  </form>
+  </div>
+</body>
+</html>
