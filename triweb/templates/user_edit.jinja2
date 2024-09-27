@@ -27,7 +27,7 @@
     </div>
     <div class="mb-2">
       <label class="form-label" for="role" >Funktion</label>
-      <select class="form-select{{ form.email.get_valid_cls() | prefix(' ') }}" id="role" name="role">
+      <select class="form-select{{ form.role.get_valid_cls() | prefix(' ') }}" id="role" name="role">
         {% for role, role_desc in roles.items() %}
           <option {{ 'selected' if form.role.value == role }} value="{{ role }}">{{ role_desc }}</option>
         {% endfor %}
