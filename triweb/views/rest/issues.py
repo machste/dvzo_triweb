@@ -2,12 +2,12 @@ import logging
 
 from pyramid.view import view_config
 
-from triweb.views import View
+from triweb.views import Private
 
 _log = logging.getLogger(__name__)
 
 
-class Issues(View):
+class Issues(Private):
 
     @view_config(route_name='rest.issues', renderer='json')
     def view(self):

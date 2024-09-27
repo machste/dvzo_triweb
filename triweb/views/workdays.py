@@ -1,10 +1,10 @@
 from pyramid.view import view_config
 
-from triweb.views import View
+from triweb.views import Private
 from triweb.models.workday import Workday
 
 
-class Workdays(View):
+class Workdays(Private):
 
     @view_config(route_name='workdays', permission='manage',
             renderer='workdays.jinja2')

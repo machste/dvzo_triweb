@@ -3,12 +3,12 @@ import logging
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPNotFound
 
-from triweb.views import View
+from triweb.views import Private
 
 _log = logging.getLogger(__name__)
 
 
-class Issue(View):
+class Issue(Private):
 
     @view_config(route_name='issue', renderer='issue.jinja2')
     def view(self):

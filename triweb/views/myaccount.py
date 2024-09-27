@@ -2,13 +2,13 @@ from pyramid.view import view_config
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 
-from triweb.views import View
+from triweb.views import Private
 from triweb.models.user import User
 from triweb.utils.form import Form
 from triweb.errors import DatabaseError
 
 
-class MyAccount(View):
+class MyAccount(Private):
 
     @view_config(route_name='myaccount', renderer='myaccount.jinja2')
     def view(self):

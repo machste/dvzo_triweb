@@ -1,11 +1,17 @@
 from pyramid.httpexceptions import HTTPForbidden
 
 
-class View(object):
+class Public(object):
+
+    def __init__(self, request):
+        self.request = request
+        self.dbsession = request.dbsession
+        self.push_toast = self.request.session.push_toast
+
+
+class Private(Public):
 
     def __init__(self, request):
         if request.identity is None:
             raise HTTPForbidden()
-        self.request = request
-        self.dbsession = request.dbsession
-        self.push_toast = self.request.session.push_toast
+        super().__init__(request)

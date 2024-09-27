@@ -3,7 +3,7 @@ from pyramid.httpexceptions import HTTPSeeOther
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 
-from triweb.views import View
+from triweb.views import Private
 from triweb.models.user import User
 from triweb.utils.form import Form
 from triweb.utils.db import get_user_roles
@@ -11,7 +11,7 @@ from triweb.utils.toast import Toast
 from triweb.errors import DatabaseError
 
 
-class UserView(View):
+class UserView(Private):
 
     @view_config(route_name='user_add', permission="administrate",
             renderer='user_edit.jinja2')

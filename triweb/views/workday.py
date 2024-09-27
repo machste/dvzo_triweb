@@ -3,7 +3,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPSeeOther
 from sqlalchemy.exc import SQLAlchemyError
 
-from triweb.views import View
+from triweb.views import Private
 from triweb.models.workday import Workday
 from triweb.utils.form import Form
 from triweb.utils.db import get_manager_display_names, get_engine_display_names
@@ -11,7 +11,7 @@ from triweb.utils.toast import Toast
 from triweb.errors import DatabaseError
 
 
-class WorkdayView(View):
+class WorkdayView(Private):
 
     @view_config(route_name='workday_add', permission='manage',
             renderer='workday_edit.jinja2')
