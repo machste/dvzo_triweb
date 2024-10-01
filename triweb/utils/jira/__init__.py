@@ -79,6 +79,7 @@ class Jira(object):
         path = f'/rest/api/3/issue/{id_or_key}'
         js_issue = self.request_json(path)
         issue = Issue.from_jira_js(js_issue)
+        issue.ext_link = f'{self.url}/browse/{issue.key}'
         _log.debug(f'Got issue: {issue}')
         # Get meta data of attachments
         for att in issue.attachments:

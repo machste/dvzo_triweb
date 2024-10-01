@@ -6,15 +6,22 @@ from triweb.utils.jira.attachment import Attachment
 
 class EnumValue(object):
 
-    def __init__(self, id, name, icon_name=None):
+    def __init__(self, id, name, icon_name=None, badge_color=None):
         self.id = id
         self.name = name
         self.icon_name = icon_name
+        self.badge_color = badge_color
 
     @property
     def icon(self):
         if self.icon_name is not None:
             return f'<i class="icon icon-{self.icon_name}"></i>'
+        return f'<i>{self.name}</i>'
+
+    @property
+    def badge(self):
+        if self.badge_color is not None:
+            return f'<span class="badge text-bg-{self.badge_color}">{self.name}</span>'
         return f'<i>{self.name}</i>'
 
     def __json__(self, request=None):
@@ -55,20 +62,20 @@ class Issue(object):
         DEFAULT = TASK
 
     class Priority(Enum):
-        HIGHEST = EnumValue(1, '++', 'prio-highest')
-        HIGH = EnumValue(2, '+', 'prio-high')
-        NORMAL = EnumValue(3, '=', 'prio-medium')
-        LOW = EnumValue(4, '-', 'prio-low')
-        LOWEST = EnumValue(5, '--', 'prio-lowest')
+        HIGHEST = EnumValue(1, 'sehr hoch', 'prio-highest')
+        HIGH = EnumValue(2, 'hoch', 'prio-high')
+        NORMAL = EnumValue(3, 'mittel', 'prio-medium')
+        LOW = EnumValue(4, 'niedrig', 'prio-low')
+        LOWEST = EnumValue(5, 'sehr niedrig', 'prio-lowest')
         DEFAULT = NORMAL
 
     class Status(Enum):
-        TO_DO = EnumValue(10029, 'To Do')
-        DOING = EnumValue(10030, 'In Bearbeitung')
-        PAUSED = EnumValue(10033, 'Pausiert')
-        TESTING = EnumValue(10032, 'Wird Getestet')
-        DONE = EnumValue(10031, 'Fertig')
-        DUPLICAT = EnumValue(10044, 'Duplikat')
+        TO_DO = EnumValue(10029, 'To Do', badge_color='secondary')
+        DOING = EnumValue(10030, 'In Bearbeitung', badge_color='primary')
+        PAUSED = EnumValue(10033, 'Pausiert', badge_color='secondary')
+        TESTING = EnumValue(10032, 'Wird Getestet', badge_color='info')
+        DONE = EnumValue(10031, 'Fertig', badge_color='success')
+        DUPLICAT = EnumValue(10044, 'Duplikat', badge_color='warning')
         DEFAULT = TO_DO
 
     class Difficulty(Enum):
@@ -95,6 +102,7 @@ class Issue(object):
     def __init__(self, id, key):
         self.id = id
         self.key = key
+        self.ext_link = None
         self._type = Issue.Type.DEFAULT
         self._priority = Issue.Priority.DEFAULT
         self._status = Issue.Status.DEFAULT
@@ -103,6 +111,8 @@ class Issue(object):
         self._summary = '(Kein Titel)'
         self.description = None
         self.attachments = []
+        self.creator = None
+        self._assignee = None
         self.workers = []
         self._created = None
         self._duedate = None
@@ -129,12 +139,24 @@ class Issue(object):
         return self._status.value.name
 
     @property
+    def status_badge(self):
+        return self._status.value.badge
+
+    @property
     def difficulty(self):
         return self._difficulty.value.name
 
     @property
     def engine(self):
         return self._engine.value.name
+
+    @property
+    def assignee(self):
+        if self._assignee is not None:
+            return self._assignee
+        elif len(self.workers) > 0:
+            return self.workers[0]
+        return None
 
     @property
     def created(self):
@@ -200,6 +222,16 @@ class Issue(object):
                     if member.value.id == status_id:
                         self._status = member
                         break
+            except:
+                pass
+        if 'creator' in fields:
+            try:
+                self.creator = fields['creator']['displayName']
+            except:
+                pass
+        if 'assignee' in fields:
+            try:
+                self._assignee = fields['assignee']['displayName']
             except:
                 pass
         if 'created' in fields:

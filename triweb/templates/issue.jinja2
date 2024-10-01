@@ -4,9 +4,58 @@
 
 <div class="container content">
 
+  <div class="issue-header border-bottom">
+    <div class="issue-badges">
+      {{ issue.type_icon | safe }}
+      <span class="badge text-bg-secondary">{{ issue.engine }}</span>
+      {{ issue.status_badge | safe }}
+      <a class="btn btn-light" data-bs-toggle="collapse" href="#issue-details"><i class="bi bi-three-dots-vertical"></i></a>
+    </div>
+    <div class="issue-details collapse" id="issue-details">
+      <div class="row mt-3">
+        <div class="col-12 col-md-6">
+          <table class="table table-sm table-borderless mb-0">
+            <tbody>
+              <tr><th>Art:</th><td>{{ issue.type }}</td></tr>
+              <tr><th>Kürzel:</th><td>{{ issue.key }} (<a href={{issue.ext_link}} target="_blank">Jira</a>)</td></tr>
+              <tr><th>Verfasser:</th><td>{{ issue.creator }}</td></tr>
+              <tr><th>Erstellt am:</th><td><span convert="to_date">{{ issue.created }}</span></td></tr>
+              {% if issue.resolved is not none %}
+                <tr><th>Erledigt am:</th><td><span convert="to_date">{{ issue.resolved }}</span></td></tr>
+              {% elif issue.duedate is not none %}
+                <tr><th>Fällig am:</th><td><span convert="to_date">{{ issue.duedate }}</span></td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+        <div class="col-12 col-md-6">
+          <table class="table table-sm table-borderless mb-0">
+            <tbody>
+              <tr><th>Priorität:</th><td>{{ issue.priority_icon | safe }} {{ issue.priority }}</td></tr>
+              <tr><th>Schwierigkeit:</th><td>{{ issue.difficulty }}</td></tr>
+              {% if issue.assignee is not none %}
+                <tr><th>Verantwortlich:</th><td>{{ issue.assignee }}</td></tr>
+              {% endif %}
+              {% if issue.workers | count > 0 %}
+                <tr>
+                  <th>Mitarbeiter:</th>
+                  <td>
+                    {% for worker in issue.workers %}
+                      <span class="text-nowrap">{{ worker }}</span>{{ ', ' if not loop.last }}
+                    {% endfor %}
+                  </td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <h1>{{issue.summary}}</h1>
+
   {% if issue.has_engine() %}
-    <h2><span class="badge text-bg-secondary">{{ issue.engine }}</span></h2>
   {% endif %}
 
   {% if issue.description is none %}

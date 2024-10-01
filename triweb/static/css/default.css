@@ -32,9 +32,10 @@ tr[onclick] {
 i.icon::before, [class^="icon-"]::before {
   content: '';
   display: inline-block;
-  width: 20px;
-  height: 20px;
-  background-size: 20px;
+  vertical-align: text-bottom;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-size: 1.25rem;
   background-repeat: no-repeat;
 }
 
@@ -88,6 +89,37 @@ i.icon-diff-low:before {
 
 i.icon-cook:before {
   background-image: url(/static/imgs/cook-1x.png);
+}
+
+div.issue-header {
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+div.issue-badges {
+  font-size: 1.25rem;
+}
+
+div.issue-badges i.icon::before, div.issue-badges [class^="icon-"]::before {
+  width: 1.75rem;
+  height: 1.75rem;
+  vertical-align: middle;
+  background-size: 1.75rem;
+  border-radius: var(--bs-border-radius);
+}
+
+div.issue-badges .badge {
+  height: 1.75rem;
+  vertical-align: middle;
+}
+
+div.issue-badges .btn {
+  height: 1.75rem;
+  --bs-btn-padding-y: 0.15rem;
+}
+
+div.issue-details th {
+  width: 40%;
 }
 
 div.alert i.alert-icon {
