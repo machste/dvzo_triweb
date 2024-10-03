@@ -24,7 +24,7 @@
               <th scope="col">Art</th>
               <th scope="col">Triebfahrzeug</th>
               <th scope="col" style="min-width:320px">Beschreibung</th>
-              <th scope="col">Mitarbeiter</th>
+              <th scope="col">Mitwirkende</th>
               <th scope="col">Erstellt am</th>
               <th scope="col">Erledigt am</th>
             </tr>
@@ -35,7 +35,7 @@
                 <td class="text-nowrap">{[ issue.engine ]}</td>
                 <td>{[ issue.summary ]}</td>
                 <td>
-                  <span v-for="(worker, i) in issue.workers"><span class="text-nowrap">{[ worker.short_name ]}</span><span v-if="i < issue.workers.length - 1">, </span></span>
+                  <span v-for="(contributor, i) in issue.contributors"><span class="text-nowrap">{[ contributor.short_name ]}</span><span v-if="i < issue.contributors.length - 1">, </span></span>
                 </td>
                 <td class="text-nowrap">{[ to_date_string(issue.created) ]}</td>
                 <td class="text-nowrap">{[ to_date_string(issue.resolved) ]}</td>
@@ -95,7 +95,7 @@
               <th scope="col">Art</th>
               <th scope="col">Triebfahrzeug</th>
               <th scope="col" style="min-width:320px">Beschreibung</th>
-              <th scope="col">Mitarbeiter</th>
+              <th scope="col">Mitwirkende</th>
               <th scope="col">Priorität</th>
               <th scope="col">Fällig am</th>
             </tr>
@@ -106,7 +106,7 @@
                 <td class="text-nowrap">{[ issue.engine ]}</td>
                 <td>{[ issue.summary ]}</td>
                 <td>
-                  <span v-for="(worker, i) in issue.workers"><span class="text-nowrap">{[ worker.short_name ]}</span><span v-if="i < issue.workers.length - 1">, </span></span>
+                  <span v-for="(contributor, i) in issue.contributors"><span class="text-nowrap">{[ contributor.short_name ]}</span><span v-if="i < issue.contributors.length - 1">, </span></span>
                 </td>
                 <td v-html="issue.priority.icon"></td>
                 <td class="text-nowrap">{[ to_date_string(issue.duedate) ]}</td>

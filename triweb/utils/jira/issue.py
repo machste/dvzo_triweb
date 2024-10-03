@@ -113,7 +113,7 @@ class Issue(object):
         self.attachments = []
         self.creator = None
         self._assignee = None
-        self.workers = []
+        self._workers = []
         self._created = None
         self._duedate = None
         self._resolved = None
@@ -154,9 +154,21 @@ class Issue(object):
     def assignee(self):
         if self._assignee is not None:
             return self._assignee
-        elif len(self.workers) > 0:
-            return self.workers[0]
+        elif len(self._workers) > 0:
+            return self._workers[0]
         return None
+
+    @property
+    def workers(self):
+        if self._assignee is not None:
+            return self._workers
+        return self._workers[1:]
+
+    @property
+    def contributors(self):
+        if self._assignee is None:
+            return self._workers
+        return [Worker(self._assignee), *self._workers]
 
     @property
     def created(self):
@@ -259,7 +271,7 @@ class Issue(object):
             except:
                 pass
         if 'customfield_10069' in fields:
-            self.workers = []
+            self._workers = []
             jira_worker_names = fields['customfield_10069']
             if jira_worker_names is not None:
                 worker_names = jira_worker_names.split(',')
@@ -267,7 +279,7 @@ class Issue(object):
                     worker_name = worker_name.strip()
                     if len(worker_name) == 0:
                         continue
-                    self.workers.append(Worker(worker_name))
+                    self._workers.append(Worker(worker_name))
         if 'attachment' in fields:
             attachments = fields['attachment']
             if attachments is not None:
@@ -289,8 +301,8 @@ class Issue(object):
                 priority=self._priority.value, status=self.status,
                 difficulty=self._difficulty.value, engine=self.engine,
                 created=self._created, duedate=self._duedate,
-                resolved=self._resolved, workers=self.workers,
-                summary=self.summary)
+                resolved=self._resolved, creator=self.creator,
+                contributors=self.contributors, summary=self.summary)
 
     def __str__(self):
         return f'{self.key}: {self._summary}'
