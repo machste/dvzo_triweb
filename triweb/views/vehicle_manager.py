@@ -5,7 +5,8 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from triweb.views import Private
 from triweb.models.user import User
-from triweb.models.vehicle import Vehicle, VehicleManager
+from triweb.models.vehicle import VehicleManager
+from triweb.utils import db
 from triweb.utils.form import Form
 from triweb.utils.toast import Toast
 from triweb.errors import DatabaseError
@@ -15,16 +16,15 @@ class VehicleManagerView(Private):
 
     def __init__(self, request):
         super().__init__(request)
-        self.vehicles = self.get_vehicles()
+        self.team_leaders = db.get_team_leaders(self.dbsession)
+        self.vehicles = db.get_vehicles(self.dbsession)
         self.prev_vmanager_user_id = None
 
     @view_config(route_name='vehicle_manager_add', permission="administrate",
             renderer='vehicle_manager_edit.jinja2')
     def view_add(self):
-        mappings = {}
-        mappings['action'] = 'add'
         vmanager = VehicleManager()
-        team_leaders = self.get_team_leaders(only_available=True)
+        team_leaders = self.get_available_team_leaders()
         form = VehicleManagerForm('add', team_leaders, self.vehicles)
         if 'form.submitted' in self.request.params:
             if form.validate(self.request.params):
@@ -37,22 +37,17 @@ class VehicleManagerView(Private):
             # Set default values
             vmanager.badge_color = '#808080'
             form.copy_from(vmanager)
-        mappings['form'] = form
-        return mappings
+        return dict(action='add', form=form)
 
     @view_config(route_name='vehicle_manager_edit', permission='administrate',
             renderer='vehicle_manager_edit.jinja2')
     def view_edit(self):
-        mappings = {}
-        mappings['action'] = 'edit'
         vmanager_id = self.request.matchdict['id']
         vmanager = self.dbsession.get(VehicleManager, vmanager_id)
         if vmanager is None:
             raise DatabaseError(f"Lok-Götti mit ID: '{vmanager_id}' nicht gefunden!")
         self.prev_vmanager_user_id = vmanager.user_id
-        team_leaders = self.get_team_leaders()
-        # Add the current vehicle manager
-        form = VehicleManagerForm('edit', team_leaders, self.vehicles)
+        form = VehicleManagerForm('edit', self.team_leaders, self.vehicles)
         if 'form.submitted' in self.request.params:
             if form.validate(self.request.params):
                 with self.dbsession.no_autoflush:
@@ -63,21 +58,12 @@ class VehicleManagerView(Private):
                 return HTTPSeeOther(self.request.route_url('vehicle_managers'))
         else:
             form.copy_from(vmanager)
-        mappings['form'] = form
-        return mappings
+        return dict(action='edit', form=form)
 
-    def get_vehicles(self, limit=25):
-        return self.dbsession.query(Vehicle).limit(limit).all()
-
-    def get_team_leaders(self, only_available=False, limit=25):
-        team_leaders = self.dbsession.query(User).\
-                filter(User.role.in_(['admin', 'manager', 'team_leader'])).\
-                limit(limit).all()
-        if not only_available:
-            return team_leaders
+    def get_available_team_leaders(self, limit=25):
         available_team_leaders = []
         vmanagers = self.dbsession.query(User).join(VehicleManager).all()
-        for team_leader in team_leaders:
+        for team_leader in self.team_leaders:
             is_already_vmanager = False
             for vmanager in vmanagers:
                 if team_leader.id == vmanager.id:

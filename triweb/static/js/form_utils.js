@@ -5,11 +5,13 @@ const form_reset_btn = document.getElementById("form-reset-btn");
 
 function save_original_values() {
     for (const el of form_inputs) {
-        if (el.nodeName == "SELECT" && el.multiple) {
+        if (el.tagName == "SELECT" && el.multiple) {
             el.orig_value = []
             for (const option of el.selectedOptions) {
                 el.orig_value.push(option.index)
             }
+        } else if (el.type == "checkbox" ) {
+            el.orig_value = el.checked;
         } else {
             el.orig_value = el.value;
         }
@@ -29,6 +31,10 @@ function have_values_changed() {
                 for (const option of el.selectedOptions) {
                     el.orig_value.push(option.index);
                 }
+            }
+        } else if (el.type == "checkbox" ) {
+            if (el.orig_value != el.checked) {
+                changed = true;
             }
         } else {
             if (el.orig_value !== el.value) {

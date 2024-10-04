@@ -5,23 +5,25 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from triweb.views import Private
 from triweb.models.workday import Workday
+from triweb.utils import db
 from triweb.utils.form import Form
-from triweb.utils.db import get_manager_display_names, get_engine_display_names
 from triweb.utils.toast import Toast
 from triweb.errors import DatabaseError
 
 
 class WorkdayView(Private):
 
+    def __init__(self, request):
+        super().__init__(request)
+        self.team_leaders = db.get_team_leaders(self.dbsession)
+        self.vehicles = db.get_vehicles(self.dbsession)
+
     @view_config(route_name='workday_add', permission='manage',
             renderer='workday_edit.jinja2')
     def view_add(self):
-        mappings = {}
-        mappings['action'] = 'add'
         workday = Workday()
-        mappings['managers'] = get_manager_display_names(self.dbsession)
-        mappings['engines'] = get_engine_display_names(self.dbsession)
-        form = WorkdayForm('workday_add')
+        form = WorkdayForm('add', self.team_leaders, self.vehicles)
+        form.date.allow_past = False
         if 'form.submitted' in self.request.params:
             if form.validate(self.request.params):
                 form.copy_to(workday)
@@ -38,21 +40,16 @@ class WorkdayView(Private):
             workday.vehicle_id = None
             workday.cook = False
             form.copy_from(workday)
-        mappings['form'] = form
-        return mappings
+        return dict(action='add', form=form)
 
     @view_config(route_name='workday_edit', permission='manage',
             renderer='workday_edit.jinja2')
     def view_edit(self):
-        mappings = {}
-        mappings['action'] = 'edit'
         workday_id = self.request.matchdict['id']
         workday = self.dbsession.get(Workday, workday_id)
         if workday is None:
             raise DatabaseError(f"Arbeitstag mit ID: '{workday_id}' nicht gefunden!")
-        mappings['managers'] = get_manager_display_names(self.dbsession)
-        mappings['engines'] = get_engine_display_names(self.dbsession)
-        form = WorkdayForm('workday_edit')
+        form = WorkdayForm('edit', self.team_leaders, self.vehicles)
         if 'form.submitted' in self.request.params:
             if form.validate(self.request.params):
                 form.copy_to(workday)
@@ -63,8 +60,7 @@ class WorkdayView(Private):
                 return HTTPSeeOther(self.request.route_url('workdays'))
         else:
             form.copy_from(workday)
-        mappings['form'] = form
-        return mappings
+        return dict(action='edit', form=form)
 
     def save_workday(self, workday):
         nested_transaction = self.dbsession.begin_nested()
@@ -79,62 +75,17 @@ class WorkdayView(Private):
 
 class WorkdayForm(Form):
 
-    FIELDS = [
-        'title',
-        'date',
-        'start_time',
-        'end_time',
-        'description',
-        'manager_id',
-        'vehicle_id',
-        'cook'
-    ]
+    def __init__(self, name, team_leaders, vehicles):
+        super().__init__(f'workday_{name}')
+        self.add_field(Form.TextField('title'))
+        self.add_field(Form.DateField('date'))
+        self.add_field(Form.TimeField('start_time'))
+        self.add_field(Form.TimeField('end_time'))
+        self.add_field(Form.TextField('description', allow_empty=True))
+        self.add_field(Form.SelectId('manager_id', team_leaders))
+        self.add_field(Form.SelectId('vehicle_id', vehicles))
+        self.add_field(Form.Checkbox('cook'))
 
-    def __init__(self, name):
-        super().__init__(name, self.FIELDS)
-
-    def copy_from(self, model):
-        self.title.value = model.title or ''
-        self.date.value = model.date.isoformat()
-        self.start_time.value = model.start_time.isoformat(timespec='minutes')
-        self.end_time.value = model.end_time.isoformat(timespec='minutes')
-        self.description.value = model.description or ''
-        self.manager_id.value = model.manager_id
-        self.vehicle_id.value = model.vehicle_id or 0
-        self.cook.value = model.cook
-
-    def copy_to(self, model):
-        model.title = self.title.value
-        model.date = date.fromisoformat(self.date.value)
-        model.start_time = time.fromisoformat(self.start_time.value)
-        model.end_time = time.fromisoformat(self.end_time.value)
-        model.description = self.description.value
-        model.manager_id = self.manager_id.value
-        model.vehicle_id = self.vehicle_id.value
-        model.cook = self.cook.value
-
-    def validate(self, params):
-        for field in self.validate_each(params):
-            if field.name == 'description':
-                continue
-            if field.name == 'date':
-                if date.fromisoformat(field.value) < date.today():
-                    field.err_msg = 'Datum liegt in der Vergangenheit!'
-                continue
-            if field.name == 'end_time':
-                start_time = time.fromisoformat(self.start_time.value)
-                end_time = time.fromisoformat(field.value)
-                if start_time >= end_time:
-                    field.err_msg = 'Ungültige Arbeitszeiten!'
-            if field.name.endswith('_id'):
-                try:
-                    field.value = int(field.value)
-                except:
-                    field.value = 0
-                continue
-            if field.name == 'cook':
-                field.value = field.value is not None
-                continue
-            if len(field.value) == 0:
-                field.err_msg = 'Dieses Feld darf nicht leer sein!'
-        return self.is_valid()
+    def do_validate_end_time(self, end_time, *kw):
+        if end_time.time <= self.start_time.time:
+             end_time.err_msg = 'Ungültige Arbeitszeiten!'

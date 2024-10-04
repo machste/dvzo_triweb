@@ -19,7 +19,7 @@
         </thead>
         <tbody>
           {% for workday in workdays %}
-            <tr onclick="window.location='{{ request.route_url('workday_edit', id=loop.index) }}'">
+            <tr {% if request.has_permission('manage') %}onclick="window.location='{{ request.route_url('workday_edit', id=workday.id) }}'"{% endif %}>
               <td class="text-nowrap"><span convert="to_date">{{ workday.date }}</span></td>
               <td class="text-nowrap">{{ workday.start_time.isoformat(timespec='minutes') }} - {{ workday.end_time.isoformat(timespec='minutes') }}</td>
               <td class="text-nowrap">{{ workday.vehicle.display_name if workday.vehicle is not none }}</td>

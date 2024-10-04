@@ -6,7 +6,7 @@
 
   <form id="form" name="{{ form.name }}" method="post" novalidate>
     <div class="mb-2">
-      <label class="form-label" for="user_id" >Person</label>
+      <label class="form-label" for="user_id" >Teamleiter</label>
       <select class="form-select{{ form.user_id.get_valid_cls() | prefix(' ') }}" id="user_id" name="user_id">
         {% for team_leader in form.user_id.options %}
           <option {{ 'selected' if form.user_id.value == team_leader.id }} value="{{ team_leader.id }}">{{ team_leader.display_name }}</option>

@@ -17,7 +17,7 @@
         </thead>
         <tbody>
           {% for vm in vehicle_managers %}
-            <tr {% if request.has_permission('administrate') %}onclick="window.location='{{ request.route_url('vehicle_manager_edit', id=loop.index) }}'"{% endif %}>
+            <tr {% if request.has_permission('administrate') %}onclick="window.location='{{ request.route_url('vehicle_manager_edit', id=vm.id) }}'"{% endif %}>
               <th scope="row">{{ loop.index }}</th>
               <td class="text-nowarp">{{ vm.user.display_name }}</td>
               <td><span class="badge" style="width:100px; height:20px; background-color:{{ vm.badge_color }}"> </span></td>

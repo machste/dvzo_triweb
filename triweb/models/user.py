@@ -18,7 +18,7 @@ class User(Base):
 
     ROLES = {
         'basic': 'Benutzer',
-        'team_leader': 'Einsatzleiter',
+        'team_leader': 'Teamleiter',
         'manager': 'Ressortleiter',
         'admin': 'Administrator'
     }

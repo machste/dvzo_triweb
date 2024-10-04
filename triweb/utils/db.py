@@ -23,3 +23,11 @@ def get_active_workdays(dbsession):
     #TODO: For simplicity get all workdays for the moment.
     workdays = dbsession.query(Workday).all()
     return workdays
+
+def get_vehicles(dbsession, limit=25):
+    return dbsession.query(Vehicle).limit(limit).all()
+
+def get_team_leaders(dbsession, limit=25):
+    return dbsession.query(User).\
+            filter(User.role.in_(['admin', 'manager', 'team_leader'])).\
+            limit(limit).all()

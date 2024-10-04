@@ -6,7 +6,7 @@ from triweb.models.vehicle_manager import VehicleManager
 
 class VehicleManagers(Private):
 
-    @view_config(route_name='vehicle_managers',
+    @view_config(route_name='vehicle_managers', permission='administrate',
             renderer='vehicle_managers.jinja2')
     def view(self):
         vehicle_managers = self.dbsession.query(VehicleManager).all()

@@ -1,6 +1,7 @@
 import re
 
 from copy import deepcopy
+from datetime import date, time
 
 from triweb.errors import GeneralError
 
@@ -115,9 +116,9 @@ class Form(object):
             self.value = params.get(self.name, self.DEFAULT)
 
         def copy_from(self, model, **kw):
-            new_value = getattr(model, self.name, None)
-            if new_value is not None:
-                self.value = new_value
+            val = getattr(model, self.name)
+            if val is not None:
+                self.value = val
 
         def do_copy_from(self, model, **kw):
             if self.copy_from_cb is None:
@@ -181,8 +182,8 @@ class Form(object):
 
         TYPE = 'text'
 
-        def __init__(self, name, allow_empty=False):
-            super().__init__(name)
+        def __init__(self, name, validator=None, allow_empty=False):
+            super().__init__(name, validator)
             self.allow_empty = allow_empty
 
         def validate(self, **kw):
@@ -190,6 +191,76 @@ class Form(object):
                 if self.allow_empty:
                     raise Form.Field.Ignore()
                 self.err_msg = 'Dieses Feld darf nicht leer sein!'
+
+
+    class DateField(Field):
+
+        TYPE = 'date'
+
+        def __init__(self, name, validator=None, allow_empty=False,
+                allow_past=True):
+            super().__init__(name, validator)
+            self.allow_empty = allow_empty
+            self.allow_past = allow_past
+
+        @property
+        def date(self):
+            try:
+                return date.fromisoformat(self.value)
+            except ValueError:
+                return None
+
+        @date.setter
+        def date(self, d):
+            self.value = d.isoformat() if d is not None else None
+
+        def copy_from(self, model, **kw):
+            self.date = getattr(model, self.name)
+
+        def copy_to(self, model, **kw):
+            setattr(model, self.name, self.date)
+
+        def validate(self, **kw):
+            if self.date is None:
+                if self.allow_empty:
+                    raise Form.Field.Ignore()
+                self.err_msg = 'Bitte wähle ein gültiges Datum!'
+            elif not self.allow_past and self.date < date.today():
+                self.err_msg = 'Datum liegt in der Vergangenheit!'
+
+
+    class TimeField(Field):
+
+        TYPE = 'time'
+
+        @property
+        def time(self):
+            return time.fromisoformat(self.value)
+
+        @time.setter
+        def time(self, t):
+            self.value = t.isoformat() if t is not None else None
+
+        def copy_from(self, model, **kw):
+            self.time = getattr(model, self.name)
+
+        def copy_to(self, model, **kw):
+            setattr(model, self.name, self.time)
+
+        def validate(self, **kw):
+            pass
+
+
+    class Checkbox(Field):
+
+        TYPE = 'checkbox'
+        DEFAULT = False
+
+        def get_from_params(self, params):
+            self.value = self.name in params
+
+        def validate(self, **kw):
+            pass
 
 
     class ColorField(Field):
