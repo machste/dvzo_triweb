@@ -105,6 +105,13 @@ class UserForm(Form):
     def __init__(self, name):
         super().__init__(name, self.FIELDS)
 
+    def copy_from(self, model):
+        self.firstname.value = model.firstname
+        self.lastname.value = model.lastname
+        self.nickname.value = model.nickname
+        self.email.value = model.email
+        self.role.value = model.role
+
     def copy_to(self, model):
         model.firstname = self.firstname.value
         model.lastname = self.lastname.value
