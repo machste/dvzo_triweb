@@ -11,8 +11,8 @@
           <tr>
             <th scope="col">Datum</th>
             <th scope="col">Arbeitszeiten</th>
-            <th scope="col">Triebfahrzeug</th>
             <th scope="col">Titel</th>
+            <th scope="col">Triebfahrzeug</th>
             <th scope="col">Leiter</th>
             <th scope="col">Rottenküche</th>
           </tr>
@@ -22,8 +22,12 @@
             <tr {% if request.has_permission('manage') %}onclick="window.location='{{ request.route_url('workday_edit', id=workday.id) }}'"{% endif %}>
               <td class="text-nowrap"><span convert="to_date">{{ workday.date }}</span></td>
               <td class="text-nowrap">{{ workday.start_time.isoformat(timespec='minutes') }} - {{ workday.end_time.isoformat(timespec='minutes') }}</td>
-              <td class="text-nowrap">{{ workday.vehicle.display_name if workday.vehicle is not none }}</td>
               <td class="text-nowrap">{{ workday.title }}</td>
+              <td>
+                {% for vehicle in workday.vehicles %}
+                  <span class="text-nowarp">{{ vehicle.display_name}}</span>{{ ', ' if not loop.last }}
+                {% endfor %}
+              </td>
               <td class="text-nowrap">{{ workday.manager.display_name }}</td>
               <td>
                 {% if workday.cook %}

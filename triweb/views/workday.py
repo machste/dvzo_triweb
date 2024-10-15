@@ -83,7 +83,8 @@ class WorkdayForm(Form):
         self.add_field(Form.TimeField('end_time'))
         self.add_field(Form.TextField('description', allow_empty=True))
         self.add_field(Form.SelectId('manager_id', team_leaders))
-        self.add_field(Form.SelectId('vehicle_id', vehicles))
+        self.add_field(Form.SelectMultipleIds(
+                'vehicles', vehicles, allow_empty=True))
         self.add_field(Form.Checkbox('cook'))
 
     def do_validate_end_time(self, end_time, *kw):
