@@ -45,11 +45,12 @@
       <i class="bi bi-person-gear"></i>
     </div>
     <div class="btn-group btn-group-sm" role="group">
-      <input type="radio" class="btn-check" name="btnradio{{ workday.id }}" id="btnradio{{ workday.id }}-1">
+      {% set state = get_poll_state(workday) %}
+      <input type="radio" class="btn-check" name="btnradio{{ workday.id }}" id="btnradio{{ workday.id }}-1"{% if state == 'no' %} checked{% endif %}>
       <label class="btn btn-outline-danger" for="btnradio{{ workday.id }}-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-      <input type="radio" class="btn-check" name="btnradio{{ workday.id }}" id="btnradio{{ workday.id }}-2">
+      <input type="radio" class="btn-check" name="btnradio{{ workday.id }}" id="btnradio{{ workday.id }}-2"{% if state == 'possible' %} checked{% endif %}>
       <label class="btn btn-outline-warning" for="btnradio{{ workday.id }}-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-      <input type="radio" class="btn-check" name="btnradio{{ workday.id }}" id="btnradio{{ workday.id }}-3">
+      <input type="radio" class="btn-check" name="btnradio{{ workday.id }}" id="btnradio{{ workday.id }}-3"{% if state == 'yes' %} checked{% endif %}>
       <label class="btn btn-outline-success" for="btnradio{{ workday.id }}-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
     </div>
   </div>
