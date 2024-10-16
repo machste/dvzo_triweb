@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from triweb.models.meta import Base
 from triweb.models.user import User
 from triweb.models.vehicle import Vehicle
-from triweb.models.associations.workday_vehicles import WorkdayVehicles
+from triweb.models.associations.workday_vehicle import WorkdayVehicle
 
 
 class Workday(Base):
@@ -22,4 +22,4 @@ class Workday(Base):
     cook = Column(Boolean, nullable=False, server_default='FALSE')
     # Relations to other tables
     manager = relationship(User)
-    vehicles = relationship(Vehicle, secondary=WorkdayVehicles.__table__)
+    vehicles = relationship(Vehicle, secondary=WorkdayVehicle.__table__)

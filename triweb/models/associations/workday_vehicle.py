@@ -3,7 +3,7 @@ from sqlalchemy import Column, ForeignKey
 from triweb.models.meta import Base
 
 
-class WorkdayVehicles(Base):
+class WorkdayVehicle(Base):
 
     __tablename__ = 'workday_vehicle_associations'
 
