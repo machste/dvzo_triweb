@@ -44,7 +44,14 @@ class Calendar(Private):
     def view(self):
         mappings = { 'month_titles': self.MONTH_NAMES }
         mappings['columns'] = self.columns
+        mappings['get_poll_state'] = self.get_poll_state
         return mappings
+
+    def get_poll_state(self, workday):
+        for poll in workday.user_polls:
+            if poll.user_id == self.request.identity.id:
+                return poll.state
+        return None
 
 
     class Month(object):

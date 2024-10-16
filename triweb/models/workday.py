@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 from triweb.models.meta import Base
 from triweb.models.user import User
 from triweb.models.vehicle import Vehicle
+from triweb.models.workday_user_poll import WorkdayUserPoll
 from triweb.models.associations.workday_vehicle import WorkdayVehicle
 
 
@@ -22,4 +23,5 @@ class Workday(Base):
     cook = Column(Boolean, nullable=False, server_default='FALSE')
     # Relations to other tables
     manager = relationship(User)
+    user_polls = relationship(WorkdayUserPoll, back_populates='workday')
     vehicles = relationship(Vehicle, secondary=WorkdayVehicle.__table__)

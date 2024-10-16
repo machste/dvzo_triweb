@@ -1,6 +1,7 @@
 from triweb.models.user import User
 from triweb.models.vehicle import Vehicle
 from triweb.models.workday import Workday
+from triweb.models.workday_user_poll import WorkdayUserPoll
 
 
 def get_manager_display_names(dbsession, limit=25):
@@ -23,6 +24,13 @@ def get_active_workdays(dbsession):
     #TODO: For simplicity get all workdays for the moment.
     workdays = dbsession.query(Workday).all()
     return workdays
+
+def get_active_workday_polls(dbsession, user_id=None):
+    #TODO: For simplicity get all polls for the moment.
+    q = dbsession.query(WorkdayUserPoll)
+    if user_id is not None:
+        q.filter(WorkdayUserPoll.user_id == user_id)
+    return q.all()
 
 def get_vehicles(dbsession, limit=25):
     return dbsession.query(Vehicle).limit(limit).all()

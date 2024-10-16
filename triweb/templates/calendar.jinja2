@@ -44,13 +44,23 @@
     <div class="workday-lead-icon" data-bs-toggle="tooltip" data-bs-title="Leitung: {{ workday.manager.display_name }}">
       <i class="bi bi-person-gear"></i>
     </div>
-    <div class="btn-group btn-group-sm" role="group">
-      <input type="radio" class="btn-check" name="btnradio{{ workday.id }}" id="btnradio{{ workday.id }}-1">
-      <label class="btn btn-outline-danger" for="btnradio{{ workday.id }}-1" data-bs-toggle="tooltip" data-bs-title="Nein"><i class="bi bi-x-circle"></i></label>
-      <input type="radio" class="btn-check" name="btnradio{{ workday.id }}" id="btnradio{{ workday.id }}-2">
-      <label class="btn btn-outline-warning" for="btnradio{{ workday.id }}-2" data-bs-toggle="tooltip" data-bs-title="Möglich"><i class="bi bi-check"></i></label>
-      <input type="radio" class="btn-check" name="btnradio{{ workday.id }}" id="btnradio{{ workday.id }}-3">
-      <label class="btn btn-outline-success" for="btnradio{{ workday.id }}-3" data-bs-toggle="tooltip" data-bs-title="Ja"><i class="bi bi-check-circle"></i></label>
+    <div class="btn-group btn-group-sm" role="group" id="btn-group{{ workday.id }}">
+      {% set state = get_poll_state(workday) -%}
+      <button type="button" class="btn btn-outline-danger{%- if state == 'no' %} active{% endif %}"
+          onclick="set_workday_poll(this, {{ workday.id }})"
+          value="no" data-bs-toggle="tooltip" data-bs-title="Nein">
+        <i class="bi bi-x-circle"></i>
+      </button>
+      <button type="button" class="btn btn-outline-warning{%- if state == 'possible' %} active{% endif %}"
+          onclick="set_workday_poll(this, {{ workday.id }})"
+          value="possible" data-bs-toggle="tooltip" data-bs-title="Möglich">
+        <i class="bi bi-check"></i>
+      </button>
+      <button type="button" class="btn btn-outline-success{%- if state == 'yes' %} active{% endif %}"
+          onclick="set_workday_poll(this, {{ workday.id }})"
+          value="yes" data-bs-toggle="tooltip" data-bs-title="Ja">
+        <i class="bi bi-check-circle"></i>
+      </button>
     </div>
   </div>
 </div>
@@ -100,5 +110,47 @@
     d = any_to_date(el.innerText);
     el.innerText = d.toLocaleDateString('de', {weekday:'short', day:'numeric', month:'numeric'})
   }
+
+  async function set_workday_poll(button, workday_id) {
+    let state = button.value;
+    let url = `rest/workday/${workday_id}/poll?state=${state}`
+    fetch(url)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`URL: '${url}' is not reachable!`);
+        }
+        response.json()
+          .then(data => {
+            if (data.ok) {
+              set_active_btn(workday_id, state);
+              console.log('workday poll: ok');
+            }
+          })
+      })
+      .catch(error => {
+        console.log(`workday poll: ${error}`);
+      })
+  }
+
+  function get_active_btn(workday_id) {
+    let btns = document.querySelectorAll(`#btn-group${workday_id} button`)
+    for (btn of btns) {
+      if (btn.classList.contains('active')) {
+        return btn.value;
+      }
+    }
+  }
+
+  function set_active_btn(workday_id, state) {
+    let btns = document.querySelectorAll(`#btn-group${workday_id} button`)
+    for (btn of btns) {
+      if (btn.value == state) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    }
+  }
+
 </script>
 {% endblock content %}

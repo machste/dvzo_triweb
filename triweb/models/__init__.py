@@ -9,6 +9,7 @@ from .user import User  # flake8: noqa
 from .workday import Workday # flake8: noqa
 from .vehicle import Vehicle # flake8: noqa
 from .vehicle_manager import VehicleManager # flake8: noqa
+from .workday_user_poll import WorkdayUserPoll # flake8: noqa
 from .associations.workday_vehicle import WorkdayVehicle # flake8: noqa
 
 # Run ``configure_mappers`` after defining all of the models to ensure
