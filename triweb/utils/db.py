@@ -22,7 +22,7 @@ def get_engine_display_names(dbsession, limit=25):
 
 def get_active_workdays(dbsession):
     #TODO: For simplicity get all workdays for the moment.
-    workdays = dbsession.query(Workday).all()
+    workdays = dbsession.query(Workday).order_by(Workday.date).all()
     return workdays
 
 def get_active_workday_polls(dbsession, user_id=None):

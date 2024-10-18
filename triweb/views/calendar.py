@@ -1,5 +1,6 @@
 import logging
 
+from datetime import date
 from pyramid.view import view_config
 
 from triweb.views import Private
@@ -34,8 +35,8 @@ class Calendar(Private):
         months = []
         month = None
         for workday in workdays:
-            if month is None or month.num != workday.date.month:
-                month = Calendar.Month(workday.date.month)
+            if month is None or not month.check_workday(workday):
+                month = Calendar.Month(workday.date)
                 months.append(month)
             month.workdays.append(workday)
         return months
@@ -56,6 +57,15 @@ class Calendar(Private):
 
     class Month(object):
 
-        def __init__(self, num):
-            self.num = num
+        def __init__(self, _date):
+            # Reset the day of the month to the first day
+            self.date = date(_date.year, _date.month, 1)
             self.workdays = []
+
+        @property
+        def num(self):
+            return self.date.month
+
+        def check_workday(self, workday):
+            return self.date.month == workday.date.month \
+                    and self.date.year == workday.date.year
