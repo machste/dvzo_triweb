@@ -6,6 +6,14 @@
 
   <form id="form" name="{{ form.name }}" method="post" novalidate>
     <div class="mb-2">
+      <label class="form-label" for="vtype">Art</label>
+      <select class="form-select" id="vtype" name="vtype">
+        {% for value, desc in types.items() %}
+          <option {{ 'selected' if form.vtype.value == value }} value="{{ value }}">{{ desc }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-2">
       <label class="form-label" for="vname">Name</label>
       <input class="form-control{{ form.vname.get_valid_cls() | prefix(' ') }}" id="vname" name="vname" value="{{ form.vname.value }}" />
       <div class="invalid-feedback">{{ form.vname.err_msg }}</div>
@@ -42,6 +50,14 @@
       <label class="form-label" for="token">Token</label>
       <input class="form-control{{ form.token.get_valid_cls() | prefix(' ') }}" id="token" name="token" value="{{ form.token.value }}" />
       <div class="invalid-feedback">{{ form.token.err_msg }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="state">Status</label>
+      <select class="form-select" id="state" name="state">
+        {% for value, desc in states.items() %}
+          <option {{ 'selected' if form.state.value == value }} value="{{ value }}">{{ desc }}</option>
+        {% endfor %}
+      </select>
     </div>
     <div class="mt-4">
       <button class="btn btn-primary" type="submit" id="form-save-btn" name="form.submitted" value="save" {{ 'disabled' if action == 'edit' }}>Speichern</button>

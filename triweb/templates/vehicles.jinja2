@@ -11,6 +11,7 @@
           <tr>
             <th scope="col">#</th>
             <th scope="col">Name</th>
+            <th scope="col">Art</th>
             <th scope="col"><abbr title="National Vehicle Register">NVR</abbr></th>
             <th scope="col">Götti</th>
             <th scope="col">Status</th>
@@ -21,9 +22,10 @@
             <tr {% if request.has_permission('administrate') %}onclick="window.location='{{ request.route_url('vehicle_edit', id=vehicle.id) }}'"{% endif %}>
               <th scope="row">{{ loop.index }}</th>
               <td>{{ vehicle.display_name }}</td>
+              <td>{{ types.get(vehicle.type, '') }}</td>
               <td>{{ vehicle.nvr | d('', True) }}</td>
               <td class="text-nowrap">{{ vehicle.manager.display_name if vehicle.manager is not none }}</td>
-              <td class="text-nowrap"></td>
+              <td class="text-nowrap">{{ states.get(vehicle.state, 'Unbekannt') }}</td>
             </tr>
           {% endfor %}
         </tbody>

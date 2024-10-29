@@ -16,11 +16,13 @@ class VehicleView(Private):
     def view_add(self):
         mappings = {}
         mappings['action'] = 'add'
-        vehicle = Vehicle()
         mappings['managers'] = self.get_vehicle_managers()
+        mappings['types'] = Vehicle.get_types()
+        mappings['states'] = Vehicle.STATES
         form = VehicleForm('vehicle_add')
         if 'form.submitted' in self.request.params:
             if form.validate(self.request.params):
+                vehicle = Vehicle.create_from_type(form.vtype.value)
                 form.copy_to(vehicle)
                 self.save_vehicle(vehicle)
                 self.push_toast('Das neue Fahrzeug wurde erfolgreich hinzugefügt!',
@@ -39,11 +41,17 @@ class VehicleView(Private):
         if vehicle is None:
             raise DatabaseError(f"Fahrzeug mit ID: '{vehicle_id}' nicht gefunden!")
         mappings['managers'] = self.get_vehicle_managers()
+        mappings['types'] = Vehicle.get_types()
+        mappings['states'] = Vehicle.STATES
         form = VehicleForm('vehicle_edit')
         if 'form.submitted' in self.request.params:
             if form.validate(self.request.params):
+                if vehicle.type != form.vtype.value:
+                    change_type = form.vtype.value
+                else:
+                    change_type = None
                 form.copy_to(vehicle)
-                vehicle = self.save_vehicle(vehicle)
+                vehicle = self.save_vehicle(vehicle, change_type)
                 self.push_toast(f"Das Fahrzeug '{vehicle.display_name}' wurde erfolgreich gespeichert!",
                         title='Fahrzeug gespeichert!',
                         type=Toast.Type.SUCCESS)
@@ -61,8 +69,15 @@ class VehicleView(Private):
             dnames[vm.id] = vm.user.display_name
         return dnames
 
-    def save_vehicle(self, vehicle):
+    def save_vehicle(self, vehicle, change_type=None):
         nested_transaction = self.dbsession.begin_nested()
+        if change_type is not None:
+            # Exchange vehicle with the new vehicle
+            new_vehicle = Vehicle.create_from_type(change_type)
+            new_vehicle.copy_from(vehicle)
+            self.dbsession.delete(vehicle)
+            self.dbsession.flush()
+            vehicle = new_vehicle
         self.dbsession.add(vehicle)
         try:
             nested_transaction.commit()
@@ -75,13 +90,15 @@ class VehicleView(Private):
 class VehicleForm(Form):
 
     FIELDS = [
+        'vtype',
         'vname',
         'number',
         'nvr',
         'token',
         'given_name',
         'short_name',
-        'manager_id'
+        'manager_id',
+        'state'
     ]
 
     def __init__(self, name):
@@ -89,12 +106,14 @@ class VehicleForm(Form):
 
     def copy_from(self, model):
         self.vname.value = model.name
+        self.vtype.value = model.type
         self.number.value = model.number
         self.nvr.value = model.nvr or ''
         self.token.value = model.token or ''
         self.given_name.value = model.given_name or ''
         self.short_name.value = model.short_name or ''
         self.manager_id.value = model.manager_id or 0
+        self.state.value = model.state
 
     def copy_to(self, model):
         model.name = self.vname.value
@@ -105,6 +124,7 @@ class VehicleForm(Form):
         model.given_name = str_or_none(self.given_name.value)
         model.short_name = str_or_none(self.short_name.value)
         model.manager_id = self.manager_id.value
+        model.state = self.state.value
 
     def validate(self, params):
         for field in self.validate_each(params):
@@ -122,6 +142,10 @@ class VehicleForm(Form):
                 except:
                     field.value = 0
                 continue
+            if field.name == 'vtype' and field.value not in Vehicle.get_types():
+                field.err_msg = 'Bitte wähle eine gültige Fahrzeugart aus!'
+            if field.name == 'state' and field.value not in Vehicle.STATES:
+                field.err_msg = 'Bitte wähle einen gültigen Status aus!'
             if len(field.value) == 0:
                 field.err_msg = 'Dieses Feld darf nicht leer sein!'
         return self.is_valid()
