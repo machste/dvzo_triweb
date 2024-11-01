@@ -22,7 +22,7 @@ class Jira(object):
         'lok18.open': 10025,
         'lok401.open': 10024,
         'ee33.open': 10032,
-        'tmiii.open': 10018,
+        'tmiii.open': 10096,
         'temiii.open': 10031,
         'general.open': 10027,
         'doing': 10023,
