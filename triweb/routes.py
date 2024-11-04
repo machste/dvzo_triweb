@@ -9,9 +9,9 @@ class TriWebRoot(DefaultRootFactory):
 
     def __acl__(self):
         return [
-            (Allow, 'role:admin', 'administrate'),
-            (Allow, 'role:admin', 'manage'),
-            (Allow, 'role:manager', 'manage')
+            (Allow, 'role:admin', ('administrate', 'manage', 'lead')),
+            (Allow, 'role:manager', ('manage', 'lead')),
+            (Allow, 'role:team_leader', 'lead')
         ]
 
 def includeme(config):
@@ -27,6 +27,7 @@ def includeme(config):
     config.add_route('user_edit', '/user/edit/{id}')
     config.add_route('vehicle_add', '/vehicle/add')
     config.add_route('vehicle_edit', '/vehicle/edit/{id}')
+    config.add_route('vehicle_state', '/vehicle/state/{id}')
     config.add_route('vehicles', '/vehicles')
     config.add_route('vehicle_manager_add', '/vehicle_manager/add')
     config.add_route('vehicle_manager_edit', '/vehicle_manager/edit/{id}')

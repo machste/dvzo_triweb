@@ -49,6 +49,26 @@ class Vehicle(Base):
             dname += f' "{self.given_name}"'
         return dname
 
+    @property
+    def location(self):
+        if self.station is None and self.track is None:
+            return 'Unbekannt'
+        track_space = None
+        if self.track is not None:
+            try:
+                track_no = int(self.track)
+                track_space = f' Gl. {track_no}'
+            except:
+                track_space = self.track
+            if self.space is not None:
+                track_space += f' ({self.space})'
+        if self.station is not None:
+            loc = self.station
+            if track_space is not None:
+                loc += f', {track_space}'
+            return loc
+        return track_space
+
     def copy_from(self, other, copy_id=False):
         self.name = other.name
         self.number = other.number

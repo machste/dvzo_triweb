@@ -1,295 +1,85 @@
 {% extends "layout.jinja2" %}
 
+{% macro loco_card(loco) -%}
+<div class="card engine position-relative"
+    {% if request.has_permission('lead') %}
+      onclick="window.location='{{ request.route_url('vehicle_state', id=loco.id) }}'"
+    {% endif %}>
+  <a class="btn btn-outline-primary btn-report-issue m-3" href="">Mangel melden</a>
+  <div class="row g-0">
+    <div class="col-4">
+      <img src="{{ request.static_url('triweb:static/imgs/card-%s.jpg' % loco.token) }}"
+          class="img-fluid rounded-start">
+    </div>
+    <div class="col-8">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item engine-header">
+          <h5 class="card-title">{{ loco.display_name }}</h5>
+          <span class="badge text-bg-{{ state_badge_colors.get(loco.state, 'warning') }}">{{ loco.STATES.get(loco.state, 'Unbekannt') }}</span>
+          {% if loco.state == 'operative' %}
+            {% if loco.type == 'steam' %}
+              {% if loco.boiler_emtpy %}
+                <span class="badge text-bg-info"><i class="bi bi-info-circle-fill"></i> Kessel leer</span>
+              {% endif %}
+              {% if loco.check_leakage %}
+                <span class="badge text-bg-warning"><i class="bi bi-exclamation-triangle-fill"></i> Dichtigkeitsprobe</span>
+              {% endif %}
+            {% elif loco.type == 'diesel' and loco.low_fuel %}
+              <span class="badge text-bg-warning"><i class="bi bi-exclamation-triangle-fill"></i> Tanken</span>
+            {% endif %}
+          {% endif %}
+        </li>
+        <li class="list-group-item engine-details">
+          <p><b>Standort:</b> {{ loco.location }}</p>
+          {% if loco.manager is not none %}
+            <p><b>Lok-Götti:</b> {{ loco.manager.display_name }}</p>
+          {% endif %}
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+{%- endmacro %}
+
+
+{% block head %}
+<link rel="stylesheet" href="{{ request.static_url('triweb:static/css/overview.css') }}">
+{% endblock head %}
+
 {% block content %}
-
-<style>
-.card.engine {
-  position: relative;
-  min-width: 360px;
-  max-width: 516px;
-}
-
-.card.engine .list-group-flush {
-  border-top-right-radius: var(--bs-list-group-border-radius);
-  border-bottom-right-radius: var(--bs-list-group-border-radius);
-}
-
-.card.engine a.btn-report-issue {
-  font-size: smaller;
-  padding: 0.25rem;
-  position: absolute;
-  z-index: 1;
-  right: 0;
-  bottom: 0;
-}
-
-.card .engine-header:hover {
-  background-color: var(--bs-tertiary-bg);
-}
-
-.card .engine-details p {
-  font-size: smaller;
-  margin-bottom: 0.25rem;
-}
-</style>
 
 <div class="container content">
   <h1>Übersicht</h1>
   <p>Dies ist eine Übersicht aller Triebfahrzeuge, die der DVZO instand hält.</p>
+
   <h2>Dampflokomotiven</h2>
 
   <div class="row">
-
-    <div class="col-lg-6 col-xxl-4 mb-3">
-      <div class="card engine position-relative">
-        <a class="btn btn-outline-primary btn-report-issue m-3" href="">Mangel melden</a>
-        <div class="row g-0">
-          <div class="col-4">
-            <img src="{{ request.static_url('triweb:static/imgs/card-lok401.jpg') }}" class="img-fluid rounded-start">
-          </div>
-          <div class="col-8">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item engine-header">
-                <h5 class="card-title">Ed 3/3 401 "Bauma"</h5>
-                <span class="badge text-bg-success">In Betrieb</span>
-              </li>
-              <li class="list-group-item engine-details">
-                <p><b>Standort:</b> Bauma, Gl. 103 (P2)</p>
-                <p><b>Lok-Götti:</b> Stefan Mächler</p>
-                <p><b>Offene Mängel:</b> ...</p>
-                <p><b>Testen:</b> ...</p>
-              </li>
-            </ul>
-          </div>
-        </div>
+    {% for loco in steam_locos %}
+      <div class="col-lg-6 col-xxl-4 mb-3">
+        {{ loco_card(loco) }}
       </div>
-    </div>
-
-    <div class="col-lg-6 col-xxl-4 mb-3">
-      <div class="card engine position-relative">
-        <a class="btn btn-outline-primary btn-report-issue m-3" href="">Mangel melden</a>
-        <div class="row g-0">
-          <div class="col-4">
-            <img src="{{ request.static_url('triweb:static/imgs/card-lok18.jpg') }}" class="img-fluid rounded-start">
-          </div>
-          <div class="col-8">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item engine-header">
-                <h5 class="card-title">E 3/3 8518 "Bäretswil"</h5>
-                <span class="badge text-bg-success">In Betrieb</span>
-              </li>
-              <li class="list-group-item engine-details">
-                <p><b>Standort:</b> Bauma, Gl. 103 (P3)</p>
-                <p><b>Offene Mängel:</b> ...</p>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-6 col-xxl-4 mb-3">
-      <div class="card engine position-relative">
-        <a class="btn btn-outline-primary btn-report-issue m-3" href="">Mangel melden</a>
-        <div class="row g-0">
-          <div class="col-4">
-            <img src="{{ request.static_url('triweb:static/imgs/card-lok9.jpg') }}" class="img-fluid rounded-start">
-          </div>
-          <div class="col-8">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item engine-header">
-                <h5 class="card-title">BT Eb 3/5 9</h5>
-                <span class="badge text-bg-success">In Betrieb</span>
-                <span class="badge text-bg-info"><i class="bi bi-info-circle-fill"></i> Kessel leer</span>
-                <span class="badge text-bg-warning"><i class="bi bi-exclamation-triangle-fill"></i> Dichtigkeitsprobe</span>
-              </li>
-              <li class="list-group-item engine-details">
-                <p><b>Standort:</b> Bauma, Gl. 103 (P1)</p>
-                <p><b>Lok-Götti:</b> Sergio Theiler</p>
-                <p><b>Offene Mängel:</b> ...</p>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-6 col-xxl-4 mb-3">
-      <div class="card engine position-relative">
-        <a class="btn btn-outline-primary btn-report-issue m-3" href="">Mangel melden</a>
-        <div class="row g-0">
-          <div class="col-4">
-            <img src="{{ request.static_url('triweb:static/imgs/card-lok2.jpg') }}" class="img-fluid rounded-start">
-          </div>
-          <div class="col-8">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item engine-header">
-                <h5 class="card-title">Ed 3/4 2 "Hinwil"</h5>
-                <span class="badge text-bg-danger">Ausser Betrieb</span>
-              </li>
-              <li class="list-group-item engine-details">
-                <p><b>Standort:</b> Uster</p>
-                <p><b>Offene Mängel:</b> ...</p>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-6 col-xxl-4 mb-3">
-      <div class="card engine position-relative">
-        <a class="btn btn-outline-primary btn-report-issue m-3" href="">Mangel melden</a>
-        <div class="row g-0">
-          <div class="col-4">
-            <img src="{{ request.static_url('triweb:static/imgs/card-lok4.jpg') }}" class="img-fluid rounded-start">
-          </div>
-          <div class="col-8">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item engine-header">
-                <h5 class="card-title">Ed 3/3 4 "Schwyz"</h5>
-                <span class="badge text-bg-danger">Ausser Betrieb</span>
-              </li>
-              <li class="list-group-item engine-details">
-                <p><b>Standort:</b> Uster</p>
-                <p><b>Offene Mängel:</b> ...</p>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    {% endfor %}
   </div>
 
   <h2>Elektrolokomotiven</h2>
 
   <div class="row">
-
-    <div class="col-lg-6 col-xxl-4 mb-3">
-      <div class="card engine position-relative">
-        <a class="btn btn-outline-primary btn-report-issue m-3" href="">Mangel melden</a>
-        <div class="row g-0">
-          <div class="col-4">
-            <img src="{{ request.static_url('triweb:static/imgs/card-be44.jpg') }}" class="img-fluid rounded-start">
-          </div>
-          <div class="col-8">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item engine-header">
-                <h5 class="card-title">BT Be 4/4 15</h5>
-                <span class="badge text-bg-danger">Ausser Betrieb</span>
-              </li>
-              <li class="list-group-item engine-details">
-                <p><b>Standort:</b> Uster</p>
-                <p><b>Offene Mängel:</b> ...</p>
-              </li>
-            </ul>
-          </div>
-        </div>
+    {% for loco in electric_locos %}
+      <div class="col-lg-6 col-xxl-4 mb-3">
+        {{ loco_card(loco) }}
       </div>
-    </div>
-
-    <div class="col-lg-6 col-xxl-4 mb-3">
-      <div class="card engine position-relative">
-        <a class="btn btn-outline-primary btn-report-issue m-3" href="">Mangel melden</a>
-        <div class="row g-0">
-          <div class="col-4">
-            <img src="{{ request.static_url('triweb:static/imgs/card-ee33.jpg') }}" class="img-fluid rounded-start">
-          </div>
-          <div class="col-8">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item engine-header">
-                <h5 class="card-title">Ee 3/3 16363</h5>
-                <span class="badge text-bg-danger">Ausser Betrieb</span>
-              </li>
-              <li class="list-group-item engine-details">
-                <p><b>Standort:</b> Bauma, Gl. 103</p>
-                <p><b>Offene Mängel:</b> ...</p>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    {% endfor %}
   </div>
 
   <h2>Traktoren</h2>
 
   <div class="row">
-
-    <div class="col-lg-6 col-xxl-4 mb-3">
-      <div class="card engine position-relative">
-        <a class="btn btn-outline-primary btn-report-issue m-3" href="">Mangel melden</a>
-        <div class="row g-0">
-          <div class="col-4">
-            <img src="{{ request.static_url('triweb:static/imgs/card-tmiii.jpg') }}" class="img-fluid rounded-start">
-          </div>
-          <div class="col-8">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item engine-header">
-                <h5 class="card-title">Tm III 9529</h5>
-                <span class="badge text-bg-success">In Betrieb</span>
-                <span class="badge text-bg-warning"><i class="bi bi-exclamation-triangle-fill"></i> Tanken</span>
-              </li>
-              <li class="list-group-item engine-details">
-                <p><b>Standort:</b> Bauma, Depotareal</p>
-                <p><b>Lok-Götti:</b> Jonas Dolny</p>
-                <p><b>Offene Mängel:</b> ...</p>
-              </li>
-            </ul>
-          </div>
-        </div>
+    {% for loco in diesel_locos %}
+      <div class="col-lg-6 col-xxl-4 mb-3">
+        {{ loco_card(loco) }}
       </div>
-    </div>
-
-    <div class="col-lg-6 col-xxl-4 mb-3">
-      <div class="card engine position-relative">
-        <a class="btn btn-outline-primary btn-report-issue m-3" href="">Mangel melden</a>
-        <div class="row g-0">
-          <div class="col-4">
-            <img src="{{ request.static_url('triweb:static/imgs/card-temiii.jpg') }}" class="img-fluid rounded-start">
-          </div>
-          <div class="col-8">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item engine-header">
-                <h5 class="card-title">Tem III 354</h5>
-                <span class="badge text-bg-success">In Betrieb</span>
-              </li>
-              <li class="list-group-item engine-details">
-                <p><b>Standort:</b> Bauma, Depotareal</p>
-                <p><b>Lok-Götti:</b> Jonas Dolny</p>
-                <p><b>Offene Mängel:</b> ...</p>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-6 col-xxl-4 mb-3">
-      <div class="card engine position-relative">
-        <a class="btn btn-outline-primary btn-report-issue m-3" href="">Mangel melden</a>
-        <div class="row g-0">
-          <div class="col-4">
-            <img src="{{ request.static_url('triweb:static/imgs/card-tmii.jpg') }}" class="img-fluid rounded-start">
-          </div>
-          <div class="col-8">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item engine-header">
-                <h5 class="card-title">Tm II 93</h5>
-                <span class="badge text-bg-success">In Betrieb</span>
-              </li>
-              <li class="list-group-item engine-details">
-                <p><b>Standort:</b> Uster</p>
-                <p><b>Offene Mängel:</b> ...</p>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    {% endfor %}
   </div>
 
 </div>

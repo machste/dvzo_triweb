@@ -276,14 +276,21 @@ class Form(object):
                 self.err_msg = 'Bitte wähle einen gültigen Farbwert!'
 
 
-    class SelectId(Field):
+    class Select(Field):
 
-        TYPE = 'id'
+        TYPE = 'text'
 
-        def __init__(self, name, options, validator=None, allow_empty=False):
+        def __init__(self, name, options, validator=None):
             super().__init__(name, validator=validator)
             self.options = options
-            self.allow_empty = allow_empty
+
+        def validate(self, **kw):
+            pass
+
+
+    class SelectId(Select):
+
+        TYPE = 'id'
 
         def convert(self):
             try:
@@ -294,10 +301,15 @@ class Form(object):
         def validate(self, **kw):
             pass
 
+
     class SelectMultiple(SelectId):
 
         TYPE = 'select_multiple'
         DEFAULT = []
+
+        def __init__(self, name, options, validator=None, allow_empty=False):
+            super().__init__(name, options, validator=validator)
+            self.allow_empty = allow_empty
 
         @property
         def values(self):
