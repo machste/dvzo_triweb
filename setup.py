@@ -33,7 +33,7 @@ tests_require = [
 
 setup(
     name='triweb',
-    version='0.14',
+    version='0.15',
     description='Webseite für das Ressort Triebfahrzeuge des DVZO',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
