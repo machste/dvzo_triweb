@@ -248,6 +248,16 @@ class Document(object):
             self._write(doc, content)
             self.html += '</div></div>\n'
 
+        def write_status(self, doc, attrs, content):
+            text = attrs.get('text', ' ')
+            color = attrs.get('color')
+            color_to_badge_type = {
+                'grey': 'secondary', 'purple': 'info', 'blue': 'primary',
+                'red': 'danger', 'yellow': 'warning', 'green': 'success'
+            }
+            badge_type = color_to_badge_type.get(color, 'secondary')
+            self.html += f'<span class="badge text-bg-{badge_type}">{text}</span>\n'
+
         def write_element(self, t, doc, attrs, content):
             if t == 'paragraph':
                 self.write_paragraph(doc, attrs, content)
@@ -277,6 +287,8 @@ class Document(object):
                 self.write_table(doc, attrs, content)
             elif t == 'panel':
                 self.write_panel(doc, attrs, content)
+            elif t == 'status':
+                self.write_status(doc, attrs, content)
             else:
                 _log.error(f"Unknown element type '{t}'!")
 
