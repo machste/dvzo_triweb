@@ -51,6 +51,18 @@ i.icon-type-lack:before {
   background-image: url(/static/imgs/type-lack.png);
 }
 
+i.icon-type-edu:before {
+  background-image: url(/static/imgs/type-edu.png);
+}
+
+i.icon-type-epic:before {
+  background-image: url(/static/imgs/type-epic.svg);
+}
+
+i.icon-type-sub:before {
+  background-image: url(/static/imgs/type-sub.svg);
+}
+
 i.icon-prio-highest:before {
   background-image: url(/static/imgs/prio-highest.svg);
 }

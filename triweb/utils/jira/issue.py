@@ -56,9 +56,9 @@ class Issue(object):
         LACK = EnumValue(10021, 'Mangel', 'type-lack')
         CRITICAL = EnumValue(10022, 'K.O.-Kriterium', 'type-crit')
         TASK = EnumValue(10018, 'Task', 'type-task')
-        KNOWHOW = EnumValue(10031, 'Ausbildung & Knowhow')
-        EPIC = EnumValue(10019, 'Epic')
-        SUB_TASK = EnumValue(10020, 'Sub-Task')
+        KNOWHOW = EnumValue(10031, 'Ausbildung & Knowhow', 'type-edu')
+        EPIC = EnumValue(10019, 'Epic', 'type-epic')
+        SUB_TASK = EnumValue(10020, 'Sub-Task', 'type-sub')
         DEFAULT = TASK
 
     class Priority(Enum):
