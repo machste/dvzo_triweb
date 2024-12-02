@@ -1,0 +1,96 @@
+{% extends "layout.jinja2" %}
+
+{% macro poll_state(state) -%}
+  {% if state == 'yes' %}
+    <span class="badge text-bg-success"><i class="bi bi-check-circle"></i></span>
+  {% elif state == 'possible' %}
+    <span class="badge text-bg-warning"><i class="bi bi-check"></i></span>
+  {% else %}
+    <span class="badge text-bg-danger"><i class="bi bi-x-circle"></i></span>
+  {% endif %}
+{%- endmacro %}
+
+{% block content %}
+<div class="container content">
+  <h1>Arbeitstag Einteilen</h1>
+
+  <div class="row mt-3">
+    <div class="col-12 col-md-6">
+      <table class="table table-sm table-borderless mb-0">
+        <tbody>
+          <tr><th>Titel:</th><td>{{ workday.title }}</td></tr>
+          <tr><th>Datum:</th><td><span convert="to_date">{{ workday.date }}</span></td></tr>
+          <tr><th>Zeit:</th><td>{{ workday.start_time.hour }}<sup>{{ '%02d' % workday.start_time.minute }}</sup> - {{ workday.end_time.hour }}<sup>{{ '%02d' % workday.end_time.minute }}</sup></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col-12 col-md-6">
+      <table class="table table-sm table-borderless mb-0">
+        <tbody>
+          <tr><th>Teamleiter:</th><td>{{ workday.manager.display_name }}</td></tr>
+          {% if workday.vehicles | count > 0 %}
+            <tr>
+              {% if workday.vehicles | count > 1 %}
+                <th>Fahrzeuge:</th>
+              {% else %}
+                <th>Fahrzeug:</th>
+              {% endif %}
+              <td>
+                {% for vehicle in workday.vehicles %}
+                  <span class="text-nowrap">{{ vehicle.display_name }}</span>{{ ', ' if not loop.last }}
+                {% endfor %}
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2>Mitarbeiter</h2>
+
+  {% if workday.user_polls | count > 0 %}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <caption>Liste aller sich gemeldeten Mitarbeiter</caption>
+        <thead>
+          <tr>
+            <th scope="col">Verfügbarkeit</th>
+            <th scope="col">Name</th>
+            <th scope="col">Einteilen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for poll in workday.user_polls %}
+            <tr >
+              <td>{{ poll_state(poll.state) }}</td>
+              <td>{{ poll.user.display_name }}</td>
+              <td>
+                <input class="btn-check" type="checkbox" >
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-warning d-flex align-items-center my-4" role="alert">
+      <i class="bi bi-exclamation-triangle-fill flex-shrink-0 alert-icon"></i>
+      <div>
+        Bis jetzt haben sich keine Mitarbeiter gemeldet!
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+
+<script>
+  const date_elements = document.querySelectorAll("span[convert=to_date]");
+
+  for (el of date_elements) {
+    d = any_to_date(el.innerText);
+    el.innerText = to_date_string(d);
+  }
+</script>
+
+{% endblock content %}
