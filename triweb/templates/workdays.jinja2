@@ -25,7 +25,7 @@
               <td class="text-nowrap">{{ workday.title }}</td>
               <td>
                 {% for vehicle in workday.vehicles %}
-                  <span class="text-nowarp">{{ vehicle.display_name}}</span>{{ ', ' if not loop.last }}
+                  <span class="text-nowrap">{{ vehicle.display_name}}</span>{{ ', ' if not loop.last }}
                 {% endfor %}
               </td>
               <td class="text-nowrap">{{ workday.manager.display_name }}</td>
