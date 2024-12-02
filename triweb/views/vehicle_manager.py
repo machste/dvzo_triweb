@@ -20,7 +20,7 @@ class VehicleManagerView(Private):
         self.vehicles = db.get_vehicles(self.dbsession)
         self.prev_vmanager_user_id = None
 
-    @view_config(route_name='vehicle_manager_add', permission="administrate",
+    @view_config(route_name='vehicle_manager.add', permission="administrate",
             renderer='vehicle_manager_edit.jinja2')
     def view_add(self):
         vmanager = VehicleManager()
@@ -39,7 +39,7 @@ class VehicleManagerView(Private):
             form.copy_from(vmanager)
         return dict(action='add', form=form)
 
-    @view_config(route_name='vehicle_manager_edit', permission='administrate',
+    @view_config(route_name='vehicle_manager.edit', permission='administrate',
             renderer='vehicle_manager_edit.jinja2')
     def view_edit(self):
         vmanager_id = self.request.matchdict['id']

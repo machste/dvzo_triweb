@@ -11,7 +11,7 @@ from triweb.errors import DatabaseError
 
 class VehicleView(Private):
 
-    @view_config(route_name='vehicle_state', permission='lead',
+    @view_config(route_name='vehicle.state', permission='lead',
             renderer='vehicle_state.jinja2')
     def view(self):
         vehicle_id = self.request.matchdict['id']

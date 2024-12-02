@@ -3,7 +3,7 @@
 {% macro loco_card(loco) -%}
 <div class="card engine position-relative"
     {% if request.has_permission('lead') %}
-      onclick="window.location='{{ request.route_url('vehicle_state', id=loco.id) }}'"
+      onclick="window.location='{{ request.route_url('vehicle.state', id=loco.id) }}'"
     {% endif %}>
   <a class="btn btn-outline-primary btn-report-issue m-3" href="">Mangel melden</a>
   <div class="row g-0">

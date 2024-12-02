@@ -19,7 +19,7 @@
         </thead>
         <tbody>
           {% for user in users %}
-            <tr {% if request.has_permission('administrate') %}onclick="window.location='{{ request.route_url('user_edit', id=user.id) }}'"{% endif %}>
+            <tr {% if request.has_permission('administrate') %}onclick="window.location='{{ request.route_url('user.edit', id=user.id) }}'"{% endif %}>
               <th scope="row">{{ loop.index }}</th>
               <td class="text-nowrap">{{ user.firstname }}</td>
               <td class="text-nowrap">{{ user.lastname }}</td>
@@ -40,7 +40,7 @@
     </div>
   {% endif %}
   {% if request.has_permission('administrate') %}
-    <a class="btn btn-primary" href="{{ request.route_url('user_add') }}">Benutzer hinzufügen</a>
+    <a class="btn btn-primary" href="{{ request.route_url('user.add') }}">Benutzer hinzufügen</a>
   {% endif %}
 </div>
 <script>

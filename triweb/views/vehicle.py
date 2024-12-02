@@ -11,7 +11,7 @@ from triweb.errors import DatabaseError
 
 class VehicleView(Private):
 
-    @view_config(route_name='vehicle_add', permission='manage',
+    @view_config(route_name='vehicle.add', permission='manage',
             renderer='vehicle_edit.jinja2')
     def view_add(self):
         mappings = {}
@@ -31,7 +31,7 @@ class VehicleView(Private):
         mappings['form'] = form
         return mappings
 
-    @view_config(route_name='vehicle_edit', permission='manage',
+    @view_config(route_name='vehicle.edit', permission='manage',
             renderer='vehicle_edit.jinja2')
     def view_edit(self):
         mappings = {}

@@ -12,7 +12,7 @@ from triweb.errors import DatabaseError
 
 class UserView(Private):
 
-    @view_config(route_name='user_add', permission="administrate",
+    @view_config(route_name='user.add', permission="administrate",
             renderer='user_edit.jinja2')
     def view_add(self):
         mappings = {}
@@ -30,7 +30,7 @@ class UserView(Private):
         mappings['form'] = form
         return mappings
 
-    @view_config(route_name='user_edit', permission='administrate',
+    @view_config(route_name='user.edit', permission='administrate',
             renderer='user_edit.jinja2')
     def view_edit(self):
         mappings = {}

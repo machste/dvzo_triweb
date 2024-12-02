@@ -19,7 +19,7 @@
         </thead>
         <tbody>
           {% for workday in workdays %}
-            <tr {% if request.has_permission('manage') %}onclick="window.location='{{ request.route_url('workday_edit', id=workday.id) }}'"{% endif %}>
+            <tr {% if request.has_permission('manage') %}onclick="window.location='{{ request.route_url('workday.edit', id=workday.id) }}'"{% endif %}>
               <td class="text-nowrap"><span convert="to_date">{{ workday.date }}</span></td>
               <td class="text-nowrap">{{ workday.start_time.isoformat(timespec='minutes') }} - {{ workday.end_time.isoformat(timespec='minutes') }}</td>
               <td class="text-nowrap">{{ workday.title }}</td>
@@ -48,7 +48,7 @@
     </div>
   {% endif %}
   {% if request.has_permission('manage') %}
-    <a class="btn btn-primary" href="{{ request.route_url('workday_add') }}">Arbeitstag hinzufügen</a>
+    <a class="btn btn-primary" href="{{ request.route_url('workday.add') }}">Arbeitstag hinzufügen</a>
   {% endif %}
 </div>
 <script>

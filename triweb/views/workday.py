@@ -18,7 +18,7 @@ class WorkdayView(Private):
         self.team_leaders = db.get_team_leaders(self.dbsession)
         self.vehicles = db.get_vehicles(self.dbsession)
 
-    @view_config(route_name='workday_add', permission='manage',
+    @view_config(route_name='workday.add', permission='manage',
             renderer='workday_edit.jinja2')
     def view_add(self):
         workday = Workday()
@@ -42,7 +42,7 @@ class WorkdayView(Private):
             form.copy_from(workday)
         return dict(action='add', form=form)
 
-    @view_config(route_name='workday_edit', permission='manage',
+    @view_config(route_name='workday.edit', permission='manage',
             renderer='workday_edit.jinja2')
     def view_edit(self):
         workday_id = self.request.matchdict['id']
