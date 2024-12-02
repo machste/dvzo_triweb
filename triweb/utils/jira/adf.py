@@ -298,6 +298,12 @@ class Document(object):
                 return text
             return f'<a href="{href}" target="blank">{text}</a>'
 
+        def mark_text_subsup(self, attrs, text):
+            t = attrs.get('type')
+            if t not in ('sub', 'sup'):
+                t = 'span'
+            return f'<{t}>{text}</{t}>'
+
         def mark_text(self, t, attrs, text):
             if t == 'link':
                 text = self.mark_text_link(attrs, text)
@@ -305,6 +311,8 @@ class Document(object):
                 text = f'<strong>{text}</strong>'
             elif t == 'em':
                 text = f'<em>{text}</em>'
+            elif t == 'subsup':
+                text = self.mark_text_subsup(attrs, text)
             else:
                 _log.error(f"Unknown text mark type '{t}'!")
             return text
