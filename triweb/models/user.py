@@ -17,7 +17,9 @@ class User(Base):
     last_login = Column(DateTime)
 
     ROLES = {
+        'guest': 'Gast',
         'basic': 'Benutzer',
+        'core': 'Kernteam',
         'team_leader': 'Teamleiter',
         'manager': 'Ressortleiter',
         'admin': 'Administrator'
