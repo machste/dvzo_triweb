@@ -24,6 +24,7 @@ class WorkdayPollView(Private):
         if poll is None:
             # ... create one.
             poll = WorkdayUserPoll(workday_id=workday_id, user_id=user_id)
+            poll.fixed = False
             ok = False
         changed = False
         # If a new state is defined, ...
