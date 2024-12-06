@@ -35,6 +35,7 @@ def includeme(config):
     config.add_route('workdays', '/workdays')
     config.add_route('workday.add', '/workday/add')
     config.add_route('workday.edit', '/workday/edit/{id}')
+    config.add_route('workday.assign', '/workday/assign/{id}')
     config.add_route('myaccount', '/myaccount')
     config.add_route('settings', '/settings')
     config.add_route('login', '/login')
@@ -42,3 +43,4 @@ def includeme(config):
     config.add_route('rest.issues', '/rest/issues/{list_name}')
     config.add_route('rest.attachment', '/rest/attachment/{id}')
     config.add_route('rest.workday.poll', '/rest/workday/{id}/poll')
+    config.add_route('rest.workday.assign', '/rest/workday/{id}/assign')
