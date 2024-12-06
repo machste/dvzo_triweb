@@ -74,6 +74,10 @@
   background-size: auto 32px;
 }
 
+.card.cal-workday .card-header[onclick]:hover {
+  cursor: pointer;
+}
+
 .card.cal-workday .card-title {
   font-size: 20px;
   font-weight: 500;
@@ -106,7 +110,6 @@
 .card.cal-workday .workday-lead-icon[onclick]:hover {
   cursor: pointer;
 }
-
 
 .card.cal-workday .card-footer {
   padding: 0.5rem;
