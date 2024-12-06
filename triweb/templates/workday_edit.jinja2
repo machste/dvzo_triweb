@@ -10,6 +10,14 @@
       <input class="form-control{{ form.title.get_valid_cls() | prefix(' ') }}" id="title" name="title" value="{{ form.title.value }}" />
       <div class="invalid-feedback">{{ form.title.err_msg }}</div>
     </div>
+    <div class="mb-2">
+      <label class="form-label" for="state" >Status</label>
+      <select class="form-select{{ form.state.get_valid_cls() | prefix(' ') }}" id="state" name="state">
+        {% for state, state_desc in form.state.options.items() %}
+          <option {{ 'selected' if form.state.value == state }} value="{{ state }}">{{ state_desc }}</option>
+        {% endfor %}
+      </select>
+    </div>
     <div class="row g-2 mb-2">
       <div class="col-md-6">
         <label class="form-label" for="date">Datum</label>

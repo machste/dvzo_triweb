@@ -86,6 +86,7 @@ class WorkdayForm(Form):
         self.add_field(Form.SelectMultipleIds(
                 'vehicles', vehicles, allow_empty=True))
         self.add_field(Form.Checkbox('cook'))
+        self.add_field(Form.Select('state', Workday.STATES))
 
     def do_validate_end_time(self, end_time, *kw):
         if end_time.time <= self.start_time.time:

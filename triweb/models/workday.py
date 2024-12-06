@@ -21,7 +21,15 @@ class Workday(Base):
     title = Column(Text, nullable=False)
     description = Column(Text)
     cook = Column(Boolean, nullable=False, server_default='FALSE')
+    state = Column(Text, nullable=False, server_default='draft')
     # Relations to other tables
     manager = relationship(User)
     user_polls = relationship(WorkdayUserPoll, back_populates='workday')
     vehicles = relationship(Vehicle, secondary=WorkdayVehicle.__table__)
+
+    STATES = {
+        'draft': 'Entwurf',
+        'published': 'Veröffentlicht',
+        'confirmed': 'Bestätigt',
+        'done': 'Erledigt'
+    }
