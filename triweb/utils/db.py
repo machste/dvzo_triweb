@@ -1,3 +1,5 @@
+from sqlalchemy import func
+
 from triweb.models.user import User
 from triweb.models.vehicle import Vehicle
 from triweb.models.workday import Workday
@@ -20,10 +22,12 @@ def get_engine_display_names(dbsession, limit=25):
         display_names[engine.id] = engine.display_name
     return display_names
 
-def get_active_workdays(dbsession):
-    #TODO: For simplicity get all workdays for the moment.
-    workdays = dbsession.query(Workday).order_by(Workday.date).all()
-    return workdays
+def get_active_workdays(dbsession, today=None):
+    active_wdays = dbsession.query(Workday).\
+            filter(Workday.date > func.now()).\
+            filter(Workday.state.in_(['published', 'confirmed'])).\
+            order_by(Workday.date).all()
+    return active_wdays
 
 def get_active_workday_polls(dbsession, user_id=None):
     #TODO: For simplicity get all polls for the moment.
