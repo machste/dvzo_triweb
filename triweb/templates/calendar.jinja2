@@ -113,7 +113,7 @@
 
   async function set_workday_poll(button, workday_id) {
     let state = button.value;
-    let url = `rest/workday/${workday_id}/poll?state=${state}`
+    let url = `/rest/workday/${workday_id}/poll?state=${state}`
     fetch(url)
       .then(response => {
         if (!response.ok) {
