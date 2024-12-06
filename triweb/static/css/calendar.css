@@ -103,6 +103,11 @@
   font-size: 24px;
 }
 
+.card.cal-workday .workday-lead-icon[onclick]:hover {
+  cursor: pointer;
+}
+
+
 .card.cal-workday .card-footer {
   padding: 0.5rem;
 }
