@@ -61,7 +61,7 @@
           </tr>
         </thead>
         <tbody>
-          {% for poll in workday.user_polls %}
+          {% for poll in workday.user_polls if poll.user.id != workday.manager.id %}
             <tr >
               <td>{{ poll_state(poll.state) }}</td>
               <td>{{ poll.user.display_name }}</td>
