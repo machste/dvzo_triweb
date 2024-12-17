@@ -40,7 +40,7 @@
             <li class="nav-item">
                 <a class="nav-link" id="calendar" href="{{ request.route_url('calendar') }}">Werkstattkalender</a>
             </li>
-            {% if request.has_permission('manage') %}
+            {% if request.has_permission('lead') %}
               <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" id="admin" href="#" role="button" data-bs-toggle="dropdown">Verwalten</a>
                   <ul class="dropdown-menu">

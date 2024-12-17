@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from sqlalchemy import func
 
 from triweb.models.user import User
@@ -24,7 +25,7 @@ def get_engine_display_names(dbsession, limit=25):
 
 def get_active_workdays(dbsession, today=None):
     active_wdays = dbsession.query(Workday).\
-            filter(Workday.date > func.now()).\
+            filter(Workday.date > date.today() - timedelta(weeks=1)).\
             filter(Workday.state.in_(['published', 'confirmed'])).\
             order_by(Workday.date).all()
     return active_wdays

@@ -5,6 +5,23 @@
   <h1>Arbeitstag {{ 'Bearbeiten' if action == 'edit' else 'Hinzufügen' }}</h1>
 
   <form id="form" name="{{ form.name }}" method="post" novalidate>
+    <div class="row g-2 mb-2">
+      <div class="col-md-6">
+        <label class="form-label" for="date">Datum</label>
+        <input class="form-control{{ form.date.get_valid_cls() | prefix(' ') }}" id="date" name="date" type="date" value="{{ form.date.value }}" />
+        <div class="invalid-feedback">{{ form.date.err_msg }}</div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="start_time">Arbeitszeiten</label>
+        <div class="input-group has-validataion">
+          <input class="form-control{{ form.start_time.get_valid_cls() | prefix(' ') }}" id="start_time" name="start_time" type="time" value="{{ form.start_time.value }}" />
+          <span class="input-group-text">bis</span>
+          <input class="form-control{{ form.end_time.get_valid_cls() | prefix(' ') }}" id="end_time" name="end_time" type="time" value="{{ form.end_time.value }}" />
+          <div class="invalid-feedback">{{ form.start_time.err_msg }}</div>
+          <div class="invalid-feedback">{{ form.end_time.err_msg }}</div>
+        </div>
+      </div>
+    </div>
     <div class="mb-2">
       <label class="form-label" for="title">Titel</label>
       <input class="form-control{{ form.title.get_valid_cls() | prefix(' ') }}" id="title" name="title" value="{{ form.title.value }}" />
@@ -18,30 +35,17 @@
         {% endfor %}
       </select>
     </div>
-    <div class="row g-2 mb-2">
-      <div class="col-md-6">
-        <label class="form-label" for="date">Datum</label>
-        <input class="form-control{{ form.date.get_valid_cls() | prefix(' ') }}" id="date" name="date" type="date" value="{{ form.date.value }}" />
-        <div class="invalid-feedback">{{ form.date.err_msg }}</div>
-      </div>
-      <div class="col-md-6">
-        <label class="form-label" for="worktime">Arbeitszeiten</label>
-        <div class="input-group has-validataion" id="worktime">
-          <input class="form-control{{ form.start_time.get_valid_cls() | prefix(' ') }}" id="start_time" name="start_time" type="time" value="{{ form.start_time.value }}" />
-          <span class="input-group-text">bis</span>
-          <input class="form-control{{ form.end_time.get_valid_cls() | prefix(' ') }}" id="end_time" name="end_time" type="time" value="{{ form.end_time.value }}" />
-          <div class="invalid-feedback">{{ form.start_time.err_msg }}</div>
-          <div class="invalid-feedback">{{ form.end_time.err_msg }}</div>
-        </div>
-      </div>
-    </div>
     <div class="mb-2">
       <label class="form-label" for="manager_id">Teamleiter</label>
-      <select class="form-select" id="manager_id" name="manager_id">
+      <select class="form-select{{ form.manager_id.get_valid_cls() | prefix(' ') }}" id="manager_id" name="manager_id" {{ 'disabled' if not request.has_permission('manage') }}>
         {% for team_leader in form.manager_id.options %}
           <option {{ 'selected' if form.manager_id.value == team_leader.id }} value="{{ team_leader.id }}">{{ team_leader.display_name }}</option>
         {% endfor %}
       </select>
+      {% if not request.has_permission('manage') %}
+        <input type="hidden" name="manager_id", value="{{ form.manager_id.value }}" />
+      {% endif %}
+      <div class="invalid-feedback">{{ form.manager_id.err_msg }}</div>
     </div>
     <div class="mb-2">
       <label class="form-label" for="vehicles" >Triebfahrzeuge</label>
@@ -58,7 +62,7 @@
     </div>
     <div class="form-check my-2">
       <input class="form-check-input" id="cook" name="cook" type="checkbox" value="cook" {{ 'checked' if form.cook.value }}>
-      <label class="form-check-label" for="private">Rottenküche in Betrieb</label>
+      <label class="form-check-label" for="cook">Rottenküche in Betrieb</label>
     </div>
     <div class="mt-4">
       <button class="btn btn-primary" type="submit" id="form-save-btn" name="form.submitted" value="save" {{ 'disabled' if action == 'edit' }}>Speichern</button>

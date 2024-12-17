@@ -11,7 +11,7 @@ _log = logging.getLogger(__name__)
 
 class WorkdayAssignView(Private):
 
-    @view_config(route_name='rest.workday.assign', permission='manage',
+    @view_config(route_name='rest.workday.assign', permission='lead',
             renderer='json')
     def view(self):
         workday_id = self.request.matchdict['id']
@@ -21,6 +21,13 @@ class WorkdayAssignView(Private):
             return dict(ok=False)
         poll = self.dbsession.get(WorkdayUserPoll, (workday_id, user_id))
         if poll is None:
+            return dict(ok=False)
+        if poll.workday.state != 'published':
+            _log.warn(f"Workday state is '{poll.workday.state}'!")
+            return dict(ok=False)
+        # Check ownership for permissions less than manager
+        if not self.request.has_permission('manage') \
+                and self.request.identity.id != poll.workday.manager_id:
             return dict(ok=False)
         poll.fixed = state
         ok = self.save_poll(poll)

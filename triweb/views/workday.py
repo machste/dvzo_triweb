@@ -1,6 +1,6 @@
 from datetime import date, time
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPSeeOther
+from pyramid.httpexceptions import HTTPSeeOther, HTTPForbidden
 from sqlalchemy.exc import SQLAlchemyError
 
 from triweb.views import Private
@@ -18,7 +18,7 @@ class WorkdayView(Private):
         self.team_leaders = db.get_team_leaders(self.dbsession)
         self.vehicles = db.get_vehicles(self.dbsession)
 
-    @view_config(route_name='workday.add', permission='manage',
+    @view_config(route_name='workday.add', permission='lead',
             renderer='workday_edit.jinja2')
     def view_add(self):
         workday = Workday()
@@ -42,13 +42,17 @@ class WorkdayView(Private):
             form.copy_from(workday)
         return dict(action='add', form=form)
 
-    @view_config(route_name='workday.edit', permission='manage',
+    @view_config(route_name='workday.edit', permission='lead',
             renderer='workday_edit.jinja2')
     def view_edit(self):
         workday_id = self.request.matchdict['id']
         workday = self.dbsession.get(Workday, workday_id)
         if workday is None:
             raise DatabaseError(f"Arbeitstag mit ID: '{workday_id}' nicht gefunden!")
+        # Check ownership for permissions less than manager
+        if not self.request.has_permission('manage') \
+                and self.request.identity.id != workday.manager_id:
+            raise HTTPForbidden()
         form = WorkdayForm('edit', self.team_leaders, self.vehicles)
         if 'form.submitted' in self.request.params:
             if form.validate(self.request.params):
