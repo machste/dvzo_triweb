@@ -96,7 +96,7 @@ class Issue(object):
         TEM3 = EnumValue(10115, 'Tem III 354')
         LOK4 = EnumValue(10116, 'Ed 3/3 4 "Schwyz"')
         LOK18 = EnumValue(10117, 'E 3/3 8518 "Bäretswil"')
-        TM3 = EnumValue(100118, 'Tm III 9529')
+        TM3 = EnumValue(10118, 'Tm III 9529')
         DEFAULT = GENERAL
 
     def __init__(self, id, key):
