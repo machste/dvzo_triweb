@@ -1,5 +1,4 @@
 from datetime import date, timedelta
-from sqlalchemy import func
 
 from triweb.models.user import User
 from triweb.models.vehicle import Vehicle
@@ -39,6 +38,20 @@ def get_active_workday_polls(dbsession, user_id=None):
 
 def get_vehicles(dbsession, limit=25):
     return dbsession.query(Vehicle).limit(limit).all()
+
+def get_managed_vehicles(dbsession, order=None, limit=25):
+    vehicles = dbsession.query(Vehicle).filter(Vehicle.token != None).all()
+    # No order is defined return immediately
+    if order is None:
+        return vehicles
+    # Order the vehicles
+    ordered_vehicles = []
+    for vehicle_type in order:
+        for vehicle in vehicles:
+            if not isinstance(vehicle, vehicle_type):
+                continue
+            ordered_vehicles.append(vehicle)
+    return ordered_vehicles
 
 def get_team_leaders(dbsession, limit=25):
     return dbsession.query(User).\
