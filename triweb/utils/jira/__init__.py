@@ -43,6 +43,11 @@ class Jira(object):
     def set_cache(self, cache):
         self.cache = cache
 
+    def clear_cache(self):
+        if self.cache is None:
+            return False
+        return self.cache.clear()
+
     def request(self, path, headers=None, redirects=True):
         url = self.url + path
         res = self.session.request('GET', url=url, auth=self.auth,
@@ -83,7 +88,7 @@ class Jira(object):
         _log.debug(f'Got issue: {issue}')
         # Get meta data of attachments
         for att in issue.attachments:
-            self.get_attachment(att, data=False)
+            self.get_attachment(att, data=False, max_age=max_age)
         # Update cache
         if self.cache is not None:
             self.cache.update_data('issues', issue.id, issue)
@@ -168,11 +173,15 @@ class Jira(object):
         TOPIC = 'Jira API'
 
 
-class IssueCache(object):
+class Cache(object):
 
     def __init__(self):
         self.max_age = 3600
         self.data = {}
+
+    def clear(self):
+        self.data = {}
+        return True
 
     def get_data(self, category, key, max_age=None):
         max_age = max_age if max_age is not None else self.max_age
@@ -226,11 +235,11 @@ def install_jira(config):
     user = settings.get('jira.user')
     token = settings.get('jira.token')
     http_session = requests.sessions.Session()
-    issue_cache = IssueCache()
+    cache = Cache()
     def jira_factory(request):
         _log.debug('Create Jira API')
         jira = Jira(url, http_session)
-        jira.set_cache(issue_cache)
+        jira.set_cache(cache)
         if user is not None and token is not None:
             jira.set_auth(user, token)
         return jira

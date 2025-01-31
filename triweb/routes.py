@@ -40,6 +40,7 @@ def includeme(config):
     config.add_route('settings', '/settings')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
+    config.add_route('rest.jira.cache.clear', '/rest/jira/cache/clear')
     config.add_route('rest.issues', '/rest/issues/{list_name}')
     config.add_route('rest.attachment', '/rest/attachment/{id}')
     config.add_route('rest.workday.poll', '/rest/workday/{id}/poll')
