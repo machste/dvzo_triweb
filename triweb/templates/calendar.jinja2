@@ -1,7 +1,7 @@
 {% extends "layout.jinja2" %}
 
 {% macro month_card(month) -%}
-<div class="card cal-month">
+<div class="card cal-month mb-2">
   <div class="card-body">
     <div class="card-title">{{ month_titles[month] }}</div>
   </div>
@@ -9,7 +9,7 @@
 {%- endmacro %}
 
 {% macro workday_card(workday) -%}
-<div class="card cal-workday">
+<div class="card cal-workday mb-2">
   <div class="card-header"
       {%- if request.has_permission('manage') or (request.has_permission('lead') and workday.manager_id == request.identity.id) %} -%}
         onclick="window.location='{{ request.route_url('workday.edit', id=workday.id) }}'"
@@ -115,9 +115,11 @@
   </p>
   <div class="row my-4 g-2">
     {% for column in columns %}
-      <div class="col col-xxl-2 col-lg-3 col-md-4 col-sm-6">
+      <div class="col-12 col-xxl-2 col-lg-3 col-md-4 col-sm-6">
         {% for month in column %}
-          {{ month_card(month.num) }}
+          {% if not month.continued %}
+            {{ month_card(month.num) }}
+          {% endif %}
           {% for workday in month.workdays %}
             {{ workday_card(workday) }}
           {% endfor %}

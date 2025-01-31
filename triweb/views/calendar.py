@@ -31,12 +31,20 @@ class Calendar(Private):
             #TODO: Combine months to fit into calendar columns
             self.columns = self.columns[:self.NUM_COLUMNS]
 
-    def get_workdays_per_month(self, workdays):
+    def get_workdays_per_month(self, workdays, limit=3):
         months = []
         month = None
         for workday in workdays:
+            create_new_month = False
+            month_continued = False
             if month is None or not month.check_workday(workday):
+                create_new_month = True
+            elif len(month) >= limit:
+                create_new_month = True
+                month_continued = True
+            if create_new_month:
                 month = Calendar.Month(workday.date)
+                month.continued = month_continued
                 months.append(month)
             month.workdays.append(workday)
         return months
@@ -61,6 +69,10 @@ class Calendar(Private):
             # Reset the day of the month to the first day
             self.date = date(_date.year, _date.month, 1)
             self.workdays = []
+            self.continued = False
+
+        def __len__(self):
+            return len(self.workdays)
 
         @property
         def num(self):
