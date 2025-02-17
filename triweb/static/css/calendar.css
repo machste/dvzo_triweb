@@ -54,6 +54,10 @@
   margin: 0.25rem 0.5rem 0.25rem 0;
 }
 
+.card.disabled {
+  filter: opacity(0.5) grayscale(1);
+}
+
 .badge-workshop {
   background-color: #3C78D8;
 }
@@ -122,4 +126,12 @@
 
 .card.cal-workday .workday-personnel span {
   white-space: nowrap;
+}
+
+.workday-overlay .stamp-text {
+  color: red;
+  background-color: #ffffff80;
+  font-size: 150%;
+  transform: rotate(-20deg);
+  padding: 10px;
 }

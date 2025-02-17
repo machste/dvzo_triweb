@@ -31,5 +31,6 @@ class Workday(Base):
         'draft': 'Entwurf',
         'published': 'Veröffentlicht',
         'confirmed': 'Bestätigt',
-        'done': 'Erledigt'
+        'done': 'Erledigt',
+        'cancelled': 'Abgesagt'
     }

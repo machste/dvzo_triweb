@@ -9,86 +9,93 @@
 {%- endmacro %}
 
 {% macro workday_card(workday) -%}
-<div class="card cal-workday mb-2">
-  <div class="card-header"
-      {%- if request.has_permission('manage') or (request.has_permission('lead') and workday.manager_id == request.identity.id) %} -%}
-        onclick="window.location='{{ request.route_url('workday.edit', id=workday.id) }}'"
-      {%- endif -%}>
-    <div class="workday-datetime">
-      <div class="workday-date"><span convert="to_date">{{ workday.date }}</span></div>
-      <div class="workday-time">
-        <i class="bi bi-clock me-2"></i>{{ workday.start_time.hour }}<sup>{{ '%02d' % workday.start_time.minute }}</sup> - {{ workday.end_time.hour }}<sup>{{ '%02d' % workday.end_time.minute }}</sup>
+<div class="position-relative">
+  <div class="card cal-workday mb-2{{ ' disabled' if workday.state in ('cancelled', 'done') }}">
+    <div class="card-header"
+        {%- if request.has_permission('manage') or (request.has_permission('lead') and workday.manager_id == request.identity.id) %} -%}
+          onclick="window.location='{{ request.route_url('workday.edit', id=workday.id) }}'"
+        {%- endif -%}>
+      <div class="workday-datetime">
+        <div class="workday-date"><span convert="to_date">{{ workday.date }}</span></div>
+        <div class="workday-time">
+          <i class="bi bi-clock me-2"></i>{{ workday.start_time.hour }}<sup>{{ '%02d' % workday.start_time.minute }}</sup> - {{ workday.end_time.hour }}<sup>{{ '%02d' % workday.end_time.minute }}</sup>
+        </div>
       </div>
-    </div>
-    {% if workday.cook %}
-      <div class="workday-cook"></div>
-    {% endif %}
-  </div>
-  <div class="card-body">
-    <div class="workday-badges">
-      {% if workday.vehicles | count > 0 %}
-        {% for vehicle in workday.vehicles %}
-          {% if vehicle.manager is not none %}
-            <span class="badge" style="background-color:{{ vehicle.manager.badge_color }};">{{ vehicle.short_name or vehicle.name }}</span>
-          {% else %}
-            <span class="badge badge-lok">{{ vehicle.short_name or vehicle.name }}</span>
-          {% endif %}
-        {% endfor %}
-      {% else %}
-        <span class="badge badge-workshop">Werkstatt</span>
+      {% if workday.cook %}
+        <div class="workday-cook"></div>
       {% endif %}
     </div>
-    <div class="card-title">{{ workday.title }}</div>
-    {% if workday.description is not none %}
-      {{ workday.description | md_to_html }}
-    {% endif %}
-  </div>
-  {% if workday.state in ('confirmed', 'done') %}
-    <div class="card-footer workday-personnel">
-      <div><i class="bi bi-person-gear me-1"></i><span>{{ workday.manager.display_name }}</span></div>
-      <div>
-        <i class="bi bi-people me-1"></i>
-        {%- for poll in workday.user_polls if poll.fixed -%}
-          <span class="text-nowrap">{{ poll.user.display_name }}</span>{{ ', ' if not loop.last }}
-        {%- endfor -%}
+    <div class="card-body">
+      <div class="workday-badges">
+        {% if workday.vehicles | count > 0 %}
+          {% for vehicle in workday.vehicles %}
+            {% if vehicle.manager is not none %}
+              <span class="badge" style="background-color:{{ vehicle.manager.badge_color }};">{{ vehicle.short_name or vehicle.name }}</span>
+            {% else %}
+              <span class="badge badge-lok">{{ vehicle.short_name or vehicle.name }}</span>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <span class="badge badge-workshop">Werkstatt</span>
+        {% endif %}
       </div>
+      <div class="card-title">{{ workday.title }}</div>
+      {% if workday.description is not none %}
+        {{ workday.description | md_to_html }}
+      {% endif %}
     </div>
-  {% else %}
-    <div class="card-body d-flex justify-content-between align-items-center">
-      <div class="workday-lead-icon" data-bs-toggle="tooltip"
-          data-bs-title="Leitung: {{ workday.manager.display_name }}"
-          {%- if request.has_permission('manage') or (request.has_permission('lead') and workday.manager_id == request.identity.id) %} -%}
-            onclick="window.location='{{ request.route_url('workday.assign', id=workday.id) }}'"
-          {%- endif -%}>
-        <i class="bi bi-person-gear"></i>
-      </div>
-      {% if request.identity.id != workday.manager_id %}
-        <div class="btn-group btn-group-sm" role="group" id="btn-group{{ workday.id }}">
-          {% set state = get_poll_state(workday) -%}
-          <button type="button" class="btn btn-outline-danger{%- if state == 'no' %} active{% endif %}"
-              onclick="set_workday_poll(this, {{ workday.id }})"
-              value="no" data-bs-toggle="tooltip" data-bs-title="Nein">
-            <i class="bi bi-x-circle"></i>
-          </button>
-          <button type="button" class="btn btn-outline-warning{%- if state == 'possible' %} active{% endif %}"
-              onclick="set_workday_poll(this, {{ workday.id }})"
-              value="possible" data-bs-toggle="tooltip" data-bs-title="Möglich">
-            <i class="bi bi-check"></i>
-          </button>
-          <button type="button" class="btn btn-outline-success{%- if state == 'yes' %} active{% endif %}"
-              onclick="set_workday_poll(this, {{ workday.id }})"
-              value="yes" data-bs-toggle="tooltip" data-bs-title="Ja">
-            <i class="bi bi-check-circle"></i>
-          </button>
-        </div>
-      {% else %}
+    {% if workday.state in ('confirmed', 'done') %}
+      <div class="card-footer workday-personnel">
+        <div><i class="bi bi-person-gear me-1"></i><span>{{ workday.manager.display_name }}</span></div>
         <div>
-          <button type="button" class="btn btn-outline-success active"
-              data-bs-toggle="tooltip" data-bs-title="Du bist Teamleiter">
-            <i class="bi bi-check-circle"></i>
-          </button>
+          <i class="bi bi-people me-1"></i>
+          {%- for poll in workday.user_polls if poll.fixed -%}
+            <span class="text-nowrap">{{ poll.user.display_name }}</span>{{ ', ' if not loop.last }}
+          {%- endfor -%}
         </div>
-      {% endif %}
+      </div>
+    {% else %}
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div class="workday-lead-icon" data-bs-toggle="tooltip"
+            data-bs-title="Leitung: {{ workday.manager.display_name }}"
+            {%- if request.has_permission('manage') or (request.has_permission('lead') and workday.manager_id == request.identity.id) %} -%}
+              onclick="window.location='{{ request.route_url('workday.assign', id=workday.id) }}'"
+            {%- endif -%}>
+          <i class="bi bi-person-gear"></i>
+        </div>
+        {% if request.identity.id != workday.manager_id %}
+          <div class="btn-group btn-group-sm" role="group" id="btn-group{{ workday.id }}">
+            {% set state = get_poll_state(workday) -%}
+            <button type="button" class="btn btn-outline-danger{%- if state == 'no' %} active{% endif %}"
+                onclick="set_workday_poll(this, {{ workday.id }})"
+                value="no" data-bs-toggle="tooltip" data-bs-title="Nein">
+              <i class="bi bi-x-circle"></i>
+            </button>
+            <button type="button" class="btn btn-outline-warning{%- if state == 'possible' %} active{% endif %}"
+                onclick="set_workday_poll(this, {{ workday.id }})"
+                value="possible" data-bs-toggle="tooltip" data-bs-title="Möglich">
+              <i class="bi bi-check"></i>
+            </button>
+            <button type="button" class="btn btn-outline-success{%- if state == 'yes' %} active{% endif %}"
+                onclick="set_workday_poll(this, {{ workday.id }})"
+                value="yes" data-bs-toggle="tooltip" data-bs-title="Ja">
+              <i class="bi bi-check-circle"></i>
+            </button>
+          </div>
+        {% else %}
+          <div>
+            <button type="button" class="btn btn-outline-success active"
+                data-bs-toggle="tooltip" data-bs-title="Du bist Teamleiter">
+              <i class="bi bi-check-circle"></i>
+            </button>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+  {% if workday.state == 'cancelled' %}
+    <div class="workday-overlay position-absolute top-50 start-50 translate-middle">
+      <div class="stamp-text">ABGESAGT!</div>
     </div>
   {% endif %}
 </div>
