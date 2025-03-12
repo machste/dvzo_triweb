@@ -36,6 +36,7 @@ class Vehicle(Base):
     STATES = {
         'operative': 'In Betrieb',
         'winterised': 'Eingewintert',
+        'suspended': 'Gesperrt',
         'out_of_order': 'Ausser Betrieb',
         'unknown': 'Unbekannt'
     }

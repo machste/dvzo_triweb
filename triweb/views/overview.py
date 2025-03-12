@@ -9,6 +9,7 @@ class Overview(Private):
     STATE_BADGE_COLORS = {
         'operative': 'success',
         'winterised': 'info',
+        'suspended': 'danger',
         'out_of_order': 'danger',
         'unknown': 'warning'
     }
