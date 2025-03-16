@@ -97,6 +97,9 @@ class Issue(object):
         LOK4 = EnumValue(10116, 'Ed 3/3 4 "Schwyz"')
         LOK18 = EnumValue(10117, 'E 3/3 8518 "Bäretswil"')
         TM3 = EnumValue(10118, 'Tm III 9529')
+        TM2 = EnumValue(10160, 'Tm II 93')
+        EM33_15 = EnumValue(10159, 'Em 3/3 18815')
+        EM33_24 = EnumValue(10158, 'Em 3/3 18824')
         LOK1 = EnumValue(10125, 'Ed 3/4 1')
         DEFAULT = GENERAL
 
