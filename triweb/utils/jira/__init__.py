@@ -51,18 +51,32 @@ class Jira(object):
             return False
         return self.cache.clear()
 
+    def _handle_response(self, res):
+        if not res.ok:
+            _log.error(f"Request '{res.url}' failed!")
+            raise self.Error(f"Anfrage bei '{self.url}' hat fehlgeschlagen!")
+        return res
+
     def request(self, path, headers=None, redirects=True):
         url = self.url + path
         res = self.session.request('GET', url=url, auth=self.auth,
                 headers=headers, allow_redirects=redirects)
-        if not res.ok:
-            _log.error(f"Request '{url}' failed!")
-            raise self.Error(f"Anfrage bei '{self.url}' hat fehlgeschlagen!")
-        return res
+        return self._handle_response(res)
 
     def request_json(self, path):
         headers = { 'Accept': 'application/json' }
         res = self.request(path, headers=headers)
+        return res.json()
+
+    def post_json(self, path, data):
+        url = self.url + path
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+        res = self.session.request('POST', url=url, auth=self.auth,
+                headers=headers, data=data)
+        self._handle_response(res)
         return res.json()
 
     def _get_issue_from_cache(self, id_or_key, max_age=None):
@@ -96,6 +110,14 @@ class Jira(object):
         if self.cache is not None:
             self.cache.update_data('issues', issue.id, issue)
         return issue
+
+    @lock(GLOBAL_LOCK)
+    def create_issue(self, issue):
+        _log.debug(f'Create issue: {issue}\n{issue.to_jira_js()}')
+        path = f'/rest/api/3/issue'
+        res = self.post_json(path, issue.to_jira_js())
+        _log.debug(f'Response: {res}')
+        return res
 
     def _get_attachment_from_cache(self, id, max_age=None):
         if self.cache is None:

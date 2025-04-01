@@ -1,15 +1,19 @@
+import json
+
 from enum import Enum
 from datetime import date
 
+from triweb.models.vehicle import Vehicle
 from triweb.utils.jira.adf import Document
 from triweb.utils.jira.attachment import Attachment
 
 class EnumValue(object):
 
-    def __init__(self, id, name, icon_name=None, badge_color=None):
+    def __init__(self, id, name, icon_name=None, short=None, badge_color=None):
         self.id = id
         self.name = name
         self.icon_name = icon_name
+        self._short_name = short
         self.badge_color = badge_color
 
     @property
@@ -17,6 +21,10 @@ class EnumValue(object):
         if self.icon_name is not None:
             return f'<i class="icon icon-{self.icon_name}"></i>'
         return f'<i>{self.name}</i>'
+
+    @property
+    def short_name(self):
+        return self._short_name or self.name
 
     @property
     def badge(self):
@@ -51,6 +59,11 @@ class Worker(object):
 
 
 class Issue(object):
+
+    class Project(Enum):
+        TRI = EnumValue(10006, 'DVZO Triebfahrzeuge', short='TRI')
+        DRBA = EnumValue(10007, 'DVZO Remise Bauma (Alg.)', short='DRBA')
+        DEFAULT = TRI
 
     class Type(Enum):
         LACK = EnumValue(10021, 'Mangel', 'type-lack')
@@ -89,24 +102,25 @@ class Issue(object):
 
     class Engine(Enum):
         GENERAL = EnumValue(10110, 'Allgemein')
-        LOK2 = EnumValue(10111, 'Ed 3/4 2 "Hinwil"')
-        LOK9 = EnumValue(10112, 'BT Eb 3/5 9')
-        LOK401 = EnumValue(10113, 'Ed 3/3 401 "Bauma"')
-        EE33 = EnumValue(10114, 'Ee 3/3 16363')
+        LOK2 = EnumValue(10111, 'Ed 3/4 2 "Hinwil"', short='Lok 2')
+        LOK9 = EnumValue(10112, 'BT Eb 3/5 9', short='Lok 9')
+        LOK401 = EnumValue(10113, 'Ed 3/3 401 "Bauma"', short='Lok 401')
+        EE33 = EnumValue(10114, 'Ee 3/3 16363', short='Ee 3/3')
         TEM3 = EnumValue(10115, 'Tem III 354')
-        LOK4 = EnumValue(10116, 'Ed 3/3 4 "Schwyz"')
-        LOK18 = EnumValue(10117, 'E 3/3 8518 "Bäretswil"')
+        LOK4 = EnumValue(10116, 'Ed 3/3 4 "Schwyz"', short='Lok 4')
+        LOK18 = EnumValue(10117, 'E 3/3 8518 "Bäretswil"', short='Lok 18')
         TM3 = EnumValue(10118, 'Tm III 9529')
         TM2 = EnumValue(10160, 'Tm II 93')
         EM33_15 = EnumValue(10159, 'Em 3/3 18815')
         EM33_24 = EnumValue(10158, 'Em 3/3 18824')
-        LOK1 = EnumValue(10125, 'Ed 3/4 1')
+        LOK1 = EnumValue(10125, 'Ed 3/4 1', short='Lok 1')
         DEFAULT = GENERAL
 
-    def __init__(self, id, key):
+    def __init__(self, id=None, key=None):
         self.id = id
         self.key = key
         self.ext_link = None
+        self._project = Issue.Project.DEFAULT
         self._type = Issue.Type.DEFAULT
         self._priority = Issue.Priority.DEFAULT
         self._status = Issue.Status.DEFAULT
@@ -123,8 +137,18 @@ class Issue(object):
         self._resolved = None
 
     @property
+    def project(self):
+        return self._project.value.name
+
+    @property
     def type(self):
         return self._type.value.name
+
+    @type.setter
+    def type(self, value):
+        if not isinstance(value, Issue.Type):
+            AttributeError('Wrong type expecting issue type!')
+        self._type = value
 
     @property
     def type_icon(self):
@@ -149,10 +173,6 @@ class Issue(object):
     @property
     def difficulty(self):
         return self._difficulty.value.name
-
-    @property
-    def engine(self):
-        return self._engine.value.name
 
     @property
     def assignee(self):
@@ -196,6 +216,34 @@ class Issue(object):
     def has_engine(self):
         return self._engine != Issue.Engine.DEFAULT
 
+    def _update_summary(self, summary=None):
+        if summary is None:
+            summary = self.summary
+        if self.has_engine():
+            self._summary = f'{self._engine.value.short_name} - {summary}'
+        else:
+            self._summary = summary
+
+    @summary.setter
+    def summary(self, value):
+        self._update_summary(value)
+
+    @property
+    def engine(self):
+        return self._engine.value.name
+
+    @engine.setter
+    def engine(self, value):
+        if isinstance(value, Vehicle):
+            loco_name = f'{value.name} {value.number}'
+        else:
+            loco_name = str(value)
+        for member in Issue.Engine:
+            if member.value.name.startswith(loco_name):
+                self._engine = member
+                break
+        self._update_summary()
+
     @staticmethod
     def parse_date(date_str):
         if date_str is None:
@@ -213,6 +261,15 @@ class Issue(object):
         fields = js["fields"]
         if 'summary' in fields:
             self._summary = fields['summary']
+        if 'project' in fields:
+            try:
+                project_id = int(fields['project']['id'])
+                for member in Issue.Project:
+                    if member.value.id == project_id:
+                        self._project = member
+                        break
+            except:
+                pass
         if 'issuetype' in fields:
             try:
                 type_id = int(fields['issuetype']['id'])
@@ -300,6 +357,14 @@ class Issue(object):
                 self.description.attachments = self.attachments
         return self
 
+    def to_jira_js(self):
+        fields = dict()
+        fields['summary'] = self._summary
+        fields['project'] = dict(id=str(self._project.value.id))
+        fields['issuetype'] = dict(id=str(self._type.value.id))
+        fields['customfield_10058'] = dict(id=str(self._engine.value.id))
+        return json.dumps(dict(fields=fields))
+
     def __json__(self, request=None):
         return dict(id=self.id, key=self.key, type=self._type.value,
                 priority=self._priority.value, status=self.status,
@@ -309,4 +374,6 @@ class Issue(object):
                 contributors=self.contributors, summary=self.summary)
 
     def __str__(self):
+        if self.id is None:
+            return f'NEW: {self._summary}'
         return f'{self.key}: {self._summary}'

@@ -1,0 +1,35 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+<div class="container content">
+  <h1>Mangel Melden</h1>
+
+  <form id="form" name="{{ form.name }}" method="post" novalidate>
+    <div class="mb-2">
+      <label class="form-label" for="vehicle_id">Fahrzeug</label>
+      <select class="form-select{{ form.vehicle_id.get_valid_cls() | prefix(' ') }}" id="vehicle_id" name="vehicle_id" {{ 'disabled' if vehicle is not none }}>
+        {% for v in form.vehicle_id.options %}
+          <option {{ 'selected' if form.vehicle_id.value == v.id }} value="{{ v.id }}">{{ v.display_name }}</option>
+        {% endfor %}
+      </select>
+      {% if vehicle is not none %}
+        <input type="hidden" name="vehicle_id", value="{{ vehicle.id }}" />
+      {% endif %}
+      <div class="invalid-feedback">{{ form.vehicle_id.err_msg }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="title">Titel</label>
+      <input class="form-control{{ form.title.get_valid_cls() | prefix(' ') }}" id="title" name="title" value="{{ form.title.value }}" />
+      <div class="invalid-feedback">{{ form.title.err_msg }}</div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label" for="description">Beschreibung</label>
+      <textarea class="form-control" id="description" name="description" rows="5">{{ form.description.value }}</textarea>
+    </div>
+    <div class="mt-4">
+      <button class="btn btn-primary" type="submit" id="form-save-btn" name="form.submitted" value="save">Melden</button>
+      <a class="btn btn-secondary ms-4" href="{{ request.route_url('overview') }}">Zurück</a>
+    </div>
+  </form>
+</div>
+{% endblock content %}

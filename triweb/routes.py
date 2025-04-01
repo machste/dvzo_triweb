@@ -21,6 +21,7 @@ def includeme(config):
     config.add_route('overview', '/overview')
     config.add_route('issues', '/issues')
     config.add_route('issue', '/issue/{id}')
+    config.add_route('problem.report', '/problem/report')
     config.add_route('calendar', '/calendar')
     config.add_route('users', '/users')
     config.add_route('user.add', '/user/add')

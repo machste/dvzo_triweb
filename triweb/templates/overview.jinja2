@@ -5,7 +5,7 @@
     {% if request.has_permission('lead') %}
       onclick="window.location='{{ request.route_url('vehicle.state', id=loco.id) }}'"
     {% endif %}>
-  <a class="btn btn-outline-primary btn-report-issue m-3" href="">Mangel melden</a>
+  <a class="btn btn-outline-primary btn-report-issue m-3" href="{{ request.route_url('problem.report', _query={'vehicle_id':loco.id}) }}">Mangel melden</a>
   <div class="row g-0">
     <div class="col-4">
       <img src="{{ request.static_url('triweb:static/imgs/card-%s.jpg' % loco.token) }}"
