@@ -2,6 +2,7 @@ import json
 
 from enum import Enum
 from datetime import date
+from telnetlib import DO
 
 from triweb.models.vehicle import Vehicle
 from triweb.utils.jira.adf import Document
@@ -244,6 +245,9 @@ class Issue(object):
                 break
         self._update_summary()
 
+    def set_plain_description(self, text):
+        self.description = Document.read(text, format='plain')
+
     @staticmethod
     def parse_date(date_str):
         if date_str is None:
@@ -363,6 +367,9 @@ class Issue(object):
         fields['project'] = dict(id=str(self._project.value.id))
         fields['issuetype'] = dict(id=str(self._type.value.id))
         fields['customfield_10058'] = dict(id=str(self._engine.value.id))
+        if self.description is not None:
+            fields['description'] = self.description.dump()
+
         return json.dumps(dict(fields=fields))
 
     def __json__(self, request=None):

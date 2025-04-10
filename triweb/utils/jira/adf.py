@@ -28,7 +28,12 @@ class Document(object):
         return Document(doc['content'])
 
     @classmethod
-    def read(cls, s):
+    def read(cls, s, format='adf', **kw):
+        doc_reader = None
+        if format == 'plain':
+            doc_reader = Document.Plain(**kw)
+        if doc_reader is not None:
+            return doc_reader.read(s)
         try:
             doc = json.loads(s)
         except:
@@ -43,6 +48,12 @@ class Document(object):
             if att.id == id or att.media_id == id:
                 return att
         return None
+
+    def dump(self):
+        js = dict(type='doc', version=self.version)
+        if self.content is not None:
+            js['content'] = self.content
+        return js
 
     def write(self, format='html', **kw):
         if format == 'html':
@@ -345,6 +356,14 @@ class Document(object):
         def write(self, doc):
             self.write_styles()
             return self._write(doc, doc.content)
+
+
+    class Plain(object):
+
+        def read(self, s):
+            paragraph = dict(type='text', text=str(s))
+            content = [dict(type='paragraph', content=[paragraph])]
+            return Document(content, version=1)
 
 
     class Error(GeneralError):

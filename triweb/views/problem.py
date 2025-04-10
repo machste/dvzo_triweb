@@ -32,6 +32,8 @@ class ProblemView(Private):
                 issue.type = Issue.Type.LACK
                 issue.engine = vehicle
                 issue.summary = form.title.value
+                if len(form.description.value) != 0:
+                    issue.set_plain_description(form.description.value)
                 # Send issue to jira
                 self.request.jira.create_issue(issue)
                 self.push_toast(f"Der Mangel für das Fahrzeug '{ vehicle.display_name }' wurde erfolgreich gemeldet!",
