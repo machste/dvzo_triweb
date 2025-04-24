@@ -1,8 +1,5 @@
-import json
-
 from enum import Enum
 from datetime import date
-from telnetlib import DO
 
 from triweb.models.vehicle import Vehicle
 from triweb.utils.jira.adf import Document
@@ -369,8 +366,7 @@ class Issue(object):
         fields['customfield_10058'] = dict(id=str(self._engine.value.id))
         if self.description is not None:
             fields['description'] = self.description.dump()
-
-        return json.dumps(dict(fields=fields))
+        return dict(fields=fields)
 
     def __json__(self, request=None):
         return dict(id=self.id, key=self.key, type=self._type.value,
