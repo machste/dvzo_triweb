@@ -5,6 +5,7 @@ from triweb.models.vehicle import Vehicle
 from triweb.utils.jira.adf import Document
 from triweb.utils.jira.attachment import Attachment
 
+
 class EnumValue(object):
 
     def __init__(self, id, name, icon_name=None, short=None, badge_color=None):
@@ -30,11 +31,33 @@ class EnumValue(object):
             return f'<span class="badge text-bg-{self.badge_color}">{self.name}</span>'
         return f'<i>{self.name}</i>'
 
+    def cmp_best_effort(self, value):
+        if value == self.name or value == self.icon_name:
+            return True
+        if self._short_name is not None and value == self._short_name:
+            return True
+        try:
+            if int(value) == self.id:
+                return True
+        except:
+            pass
+        return False
+
     def __json__(self, request=None):
         return dict(name=self.name, icon=self.icon)
 
     def __repr__(self):
         return str(self.id)
+
+
+class IssueEnum(Enum):
+
+    @classmethod
+    def _missing_(cls, value):
+        for member in cls:
+            if member.name == value or member.value.cmp_best_effort(value):
+                return member
+        return None
 
 
 class Worker(object):
@@ -58,12 +81,12 @@ class Worker(object):
 
 class Issue(object):
 
-    class Project(Enum):
+    class Project(IssueEnum):
         TRI = EnumValue(10006, 'DVZO Triebfahrzeuge', short='TRI')
         DRBA = EnumValue(10007, 'DVZO Remise Bauma (Alg.)', short='DRBA')
         DEFAULT = TRI
 
-    class Type(Enum):
+    class Type(IssueEnum):
         LACK = EnumValue(10021, 'Mangel', 'type-lack')
         CRITICAL = EnumValue(10022, 'K.O.-Kriterium', 'type-crit')
         TASK = EnumValue(10018, 'Task', 'type-task')
@@ -72,7 +95,7 @@ class Issue(object):
         SUB_TASK = EnumValue(10020, 'Sub-Task', 'type-sub')
         DEFAULT = TASK
 
-    class Priority(Enum):
+    class Priority(IssueEnum):
         HIGHEST = EnumValue(1, 'sehr hoch', 'prio-highest')
         HIGH = EnumValue(2, 'hoch', 'prio-high')
         NORMAL = EnumValue(3, 'mittel', 'prio-medium')
@@ -80,7 +103,7 @@ class Issue(object):
         LOWEST = EnumValue(5, 'sehr niedrig', 'prio-lowest')
         DEFAULT = NORMAL
 
-    class Status(Enum):
+    class Status(IssueEnum):
         TO_DO = EnumValue(10029, 'To Do', badge_color='secondary')
         DOING = EnumValue(10030, 'In Bearbeitung', badge_color='primary')
         PAUSED = EnumValue(10033, 'Pausiert', badge_color='secondary')
@@ -89,7 +112,7 @@ class Issue(object):
         DUPLICAT = EnumValue(10044, 'Duplikat', badge_color='warning')
         DEFAULT = TO_DO
 
-    class Difficulty(Enum):
+    class Difficulty(IssueEnum):
         NOT_RATED = EnumValue(10124, 'nicht bewertet')
         EASY = EnumValue(10122, 'einfach', 'diff-low')
         MEDIUM = EnumValue(10120, 'mittel', 'diff-medium')
@@ -98,7 +121,7 @@ class Issue(object):
         MASTERS_ONLY = EnumValue(10119, 'sehr schwierig', 'diff-highest')
         DEFAULT = NOT_RATED
 
-    class Engine(Enum):
+    class Engine(IssueEnum):
         GENERAL = EnumValue(10110, 'Allgemein')
         LOK2 = EnumValue(10111, 'Ed 3/4 2 "Hinwil"', short='Lok 2')
         LOK9 = EnumValue(10112, 'BT Eb 3/5 9', short='Lok 9')
@@ -144,9 +167,7 @@ class Issue(object):
 
     @type.setter
     def type(self, value):
-        if not isinstance(value, Issue.Type):
-            AttributeError('Wrong type expecting issue type!')
-        self._type = value
+        self._type = self.Type(value)
 
     @property
     def type_icon(self):
@@ -171,6 +192,10 @@ class Issue(object):
     @property
     def difficulty(self):
         return self._difficulty.value.name
+
+    @difficulty.setter
+    def difficulty(self, value):
+        self._difficulty = self.Difficulty(value)
 
     @property
     def assignee(self):
@@ -264,38 +289,22 @@ class Issue(object):
             self._summary = fields['summary']
         if 'project' in fields:
             try:
-                project_id = int(fields['project']['id'])
-                for member in Issue.Project:
-                    if member.value.id == project_id:
-                        self._project = member
-                        break
+                self._project = self.Project(fields['project']['id'])
             except:
                 pass
         if 'issuetype' in fields:
             try:
-                type_id = int(fields['issuetype']['id'])
-                for member in Issue.Type:
-                    if member.value.id == type_id:
-                        self._type = member
-                        break
+                self._type = self.Type(fields['issuetype']['id'])
             except:
                 pass
         if 'priority' in fields:
             try:
-                prio_id = int(fields['priority']['id'])
-                for member in Issue.Priority:
-                    if member.value.id == prio_id:
-                        self._priority = member
-                        break
+                self._priority = self.Priority(fields['priority']['id'])
             except:
                 pass
         if 'status' in fields:
             try:
-                status_id = int(fields['status']['id'])
-                for member in Issue.Status:
-                    if member.value.id == status_id:
-                        self._status = member
-                        break
+                self._status = self.Status(fields['status']['id'])
             except:
                 pass
         if 'creator' in fields:
@@ -316,20 +325,14 @@ class Issue(object):
             self._resolved = fields['resolutiondate']
         if 'customfield_10058' in fields:
             try:
-                engine_id = int(fields['customfield_10058']['id'])
-                for member in Issue.Engine:
-                    if member.value.id == engine_id:
-                        self._engine = member
-                        break
+                engine_id = fields['customfield_10058']['id']
+                self._engine = self.Engine(engine_id)
             except:
                 pass
         if 'customfield_10067' in fields:
             try:
-                difficulty_id = int(fields['customfield_10067']['id'])
-                for member in Issue.Difficulty:
-                    if member.value.id == difficulty_id:
-                        self._difficulty = member
-                        break
+                difficulty_id = fields['customfield_10067']['id']
+                self._difficulty = self.Difficulty(difficulty_id)
             except:
                 pass
         if 'customfield_10069' in fields:
@@ -364,6 +367,7 @@ class Issue(object):
         fields['project'] = dict(id=str(self._project.value.id))
         fields['issuetype'] = dict(id=str(self._type.value.id))
         fields['customfield_10058'] = dict(id=str(self._engine.value.id))
+        fields['customfield_10067'] = dict(id=str(self._difficulty.value.id))
         if self.description is not None:
             fields['description'] = self.description.dump()
         return dict(fields=fields)
