@@ -22,9 +22,21 @@
       <input class="form-control{{ form.title.get_valid_cls() | prefix(' ') }}" id="title" name="title" value="{{ form.title.value }}" />
       <div class="invalid-feedback">{{ form.title.err_msg }}</div>
     </div>
+    <div class="mb-3">
+      <label class="form-label" for="date">Datum</label>
+      <input class="form-control{{ form.date.get_valid_cls() | prefix(' ') }}" id="date" name="date" type="date" value="{{ form.date.value }}" />
+      <div class="invalid-feedback">{{ form.date.err_msg }}</div>
+      <div id="date_help" class="form-text">Wann wurde der Mangel entdeckt?</div>
+    </div>
     <div class="mb-2">
       <label class="form-label" for="description">Beschreibung</label>
       <textarea class="form-control" id="description" name="description" rows="5">{{ form.description.value }}</textarea>
+      <div id="description_help" class="form-text">
+        Beschreibe, wie der Mangel entdeckt wurde, wie er sich manifestiert und
+        ob andere Baugruppen betroffen sind. Konnte der Betrieb trotzdem
+        fortgesetzt werden, mussten Sofortmassnahmen ergriffen werden oder
+        musste der Betrieb eingestellt werden?
+      </div>
     </div>
     <div class="mt-4">
       <button class="btn btn-primary" type="submit" id="form-save-btn" name="form.submitted" value="save">Melden</button>

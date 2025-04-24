@@ -1,3 +1,4 @@
+from datetime import date
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPSeeOther
 
@@ -39,6 +40,8 @@ class ProblemView(Private):
                 self.push_toast(f"Der Mangel für das Fahrzeug '{ vehicle.display_name }' wurde erfolgreich gemeldet!",
                         title='Mangel gemeldet!', type=Toast.Type.SUCCESS)
                 return HTTPSeeOther(self.request.route_url('overview'))
+        else:
+            form.date.value = date.today()
         mappings['form'] = form
         return mappings
 
@@ -49,4 +52,5 @@ class ProblemForm(Form):
         super().__init__(f'problem_report')
         self.add_field(Form.SelectId('vehicle_id', vehicles))
         self.add_field(Form.TextField('title'))
+        self.add_field(Form.DateField('date'))
         self.add_field(Form.TextField('description', allow_empty=True))
