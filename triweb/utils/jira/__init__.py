@@ -57,15 +57,15 @@ class Jira(object):
             raise self.Error(f"Anfrage bei '{self.url}' hat fehlgeschlagen!")
         return res
 
-    def request(self, path, headers=None, redirects=True):
+    def get(self, path, headers=None, redirects=True):
         url = self.url + path
         res = self.session.request('GET', url=url, auth=self.auth,
                 headers=headers, allow_redirects=redirects)
         return self._handle_response(res)
 
-    def request_json(self, path):
+    def get_json(self, path):
         headers = { 'Accept': 'application/json' }
-        res = self.request(path, headers=headers)
+        res = self.get(path, headers=headers)
         return res.json()
 
     def post_json(self, path, data):
@@ -99,7 +99,7 @@ class Jira(object):
             return issue
         # Otherwise get the issue from Jira
         path = f'/rest/api/3/issue/{id_or_key}'
-        js_issue = self.request_json(path)
+        js_issue = self.get_json(path)
         issue = Issue.from_jira_js(js_issue)
         issue.ext_link = f'{self.url}/browse/{issue.key}'
         _log.debug(f'Got issue: {issue}')
@@ -143,7 +143,7 @@ class Jira(object):
             update_cache = True
             # Get the attachment from Jira
             path = f'/rest/api/3/attachment/content/{att.id}'
-            res = self.request(path, redirects=False)
+            res = self.get(path, redirects=False)
             if not res.is_redirect:
                 raise self.Error(f"Die Media-ID vom Anhang #{att.id} kann nicht geladen werden!")
             att.data_url = res.headers['Location']
@@ -180,7 +180,7 @@ class Jira(object):
         # Otherwise get the issues from Jira
         issues = []
         path = f'/rest/api/3/search?&fields=issuetype,status,priority,summary,creator,assignee,created,duedate,resolutiondate,customfield_10058,customfield_10067,customfield_10069&jql=filter%3D{filter_id}'
-        js = self.request_json(path)
+        js = self.get_json(path)
         js_issues = js['issues']
         _log.info(f"Get issues '{list_name}' (id: {filter_id}) ...")
         for js_issue in js_issues:
