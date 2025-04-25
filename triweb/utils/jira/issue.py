@@ -148,7 +148,7 @@ class Issue(object):
         self._difficulty = Issue.Difficulty.DEFAULT
         self._engine = Issue.Engine.DEFAULT
         self._summary = '(Kein Titel)'
-        self.description = None
+        self._description = None
         self.attachments = []
         self.creator = None
         self._assignee = None
@@ -267,8 +267,16 @@ class Issue(object):
                 break
         self._update_summary()
 
-    def set_plain_description(self, text):
-        self.description = Document.read(text, format='plain')
+    @property
+    def description(self):
+        return self._description
+
+    @description.setter
+    def description(self, value):
+        if isinstance(value, Document):
+            self._description = value
+        else:
+            self._description = Document.read(str(value), format='plain')
 
     @staticmethod
     def parse_date(date_str):
@@ -368,8 +376,8 @@ class Issue(object):
         fields['issuetype'] = dict(id=str(self._type.value.id))
         fields['customfield_10058'] = dict(id=str(self._engine.value.id))
         fields['customfield_10067'] = dict(id=str(self._difficulty.value.id))
-        if self.description is not None:
-            fields['description'] = self.description.dump()
+        if self._description is not None:
+            fields['description'] = self._description.dump()
         return dict(fields=fields)
 
     def __json__(self, request=None):

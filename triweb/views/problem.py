@@ -7,6 +7,7 @@ from triweb.models.vehicle import Vehicle
 from triweb.utils import db
 from triweb.utils.form import Form
 from triweb.utils.jira.issue import Issue
+from triweb.utils.jira.adf import Document
 from triweb.utils.toast import Toast
 
 
@@ -33,8 +34,20 @@ class ProblemView(Private):
                 issue.type = Issue.Type.LACK
                 issue.engine = vehicle
                 issue.summary = form.title.value
+                doc = Document()
+                doc.add_content(Document.Heading(1, 'Ausgangslage'))
+                p = Document.Paragraph()
+                p.add_content(Document.Text('Dieser Mangel wurde am '))
+                p.add_content(Document.Date(form.date.value))
+                dname = self.request.identity.display_name
+                p.add_content(Document.Text(f' festgestellt und von {dname} gemeldet.'))
+                doc.add_content(p)
                 if len(form.description.value) != 0:
-                    issue.set_plain_description(form.description.value)
+                    doc.add_content(Document.Heading(2, 'Beschreibung des Mangels'))
+                    doc.add_content(Document.Paragraph(form.description.value))
+                else:
+                    doc.add_content('Der Mangel wurde nicht weiter beschrieben.')
+                issue.description = doc
                 # Send issue to jira
                 self.request.jira.create_issue(issue)
                 self.push_toast(f"Der Mangel für das Fahrzeug '{ vehicle.display_name }' wurde erfolgreich gemeldet!",
