@@ -2,7 +2,7 @@ import logging
 import os
 import json
 
-from datetime import date
+from datetime import date, datetime
 from urllib.parse import urlparse
 
 from triweb.errors import GeneralError
@@ -12,20 +12,43 @@ _log = logging.getLogger(__name__)
 
 class Document(object):
 
-    def __init__(self, content, version=0):
+    def __init__(self, content=None, version=1):
         self.version = version
-        self.content = content
+        self.adf_content = None
+        self.content = []
+        if content is not None:
+            self.add_content(content)
         self.attachments = []
 
     @classmethod
-    def load(cls, doc):
-        if 'type' not in doc or doc['type'] != 'doc':
+    def load(cls, adf_data):
+        # Check ADF type
+        if 'type' not in adf_data or adf_data['type'] != 'doc':
             raise Document.Error('Unbekannter Dokumenttyp!')
-        if 'content' not in doc:
+        # Check ADF version
+        if 'version' in adf_data:
+            doc = Document(version=adf_data['version'])
+        else:
+            doc = Document()
+        # Check and add content
+        if 'content' not in adf_data:
             raise Document.Error('Leeres Dokument!')
-        if 'version' in doc:
-            return Document(doc['content'], doc['version'])
-        return Document(doc['content'])
+        doc.adf_content = adf_data['content']
+        return doc
+
+    def dump_content(self):
+        if self.adf_content is not None:
+            return self.adf_content
+        elif self.content is not None:
+            content = []
+            for c in self.content:
+                content.append(c.dump())
+        return content
+
+    def dump(self):
+        js = dict(type='doc', version=self.version)
+        js['content'] = self.dump_content()
+        return js
 
     @classmethod
     def read(cls, s, format='adf', **kw):
@@ -40,6 +63,20 @@ class Document(object):
             raise Document.Error('Ungültige ADF Daten!')
         return cls.load(doc)
 
+    def write(self, format='html', **kw):
+        if format == 'html':
+            doc_writer = Document.Html(**kw)
+        else:
+            raise Document.Error(f"Ungültiges Ausgabeformat '{format}'!")
+        return doc_writer.write(self)
+
+    def add_content(self, content):
+        if isinstance(content, str):
+            content = Document.Paragraph(content)
+        elif not isinstance(content, Document.Content):
+            raise Document.Error(f'Ungültiger ADF Inhalt!')
+        self.content.append(content)
+
     def add_attachment(self, attachment):
         self.attachments.append(attachment)
 
@@ -49,18 +86,96 @@ class Document(object):
                 return att
         return None
 
-    def dump(self):
-        js = dict(type='doc', version=self.version)
-        if self.content is not None:
-            js['content'] = self.content
-        return js
 
-    def write(self, format='html', **kw):
-        if format == 'html':
-            doc_writer = Document.Html(**kw)
-        else:
-            raise Document.Error(f"Ungültiges Ausgabeformat '{format}'!")
-        return doc_writer.write(self)
+    class Content(object):
+
+        def __init__(self, type):
+            self.type = type
+            self.empty_content = False
+            self.convert_strings = False
+            self.attrs = None
+            self.content = []
+
+        def handle_unknown_content(self, content):
+            _log.error(f'Invalid ADF content! ({content})')
+            raise Document.Error('Ungültiger ADF Inhalt!')
+
+        def add_content(self, content):
+            if isinstance(content, Document.Content):
+                self.content.append(content)
+            elif isinstance(content, list):
+                for c in content:
+                    self.add_content(c)
+            elif isinstance(content, str) and self.convert_strings:
+                self.content.append(Document.Text(content))
+            else:
+                self.handle_unknown_content(content)
+
+        def dump(self):
+            js = dict(type=self.type)
+            if self.attrs is not None:
+                js['attrs'] = self.attrs
+            if len(self.content) > 0 or self.empty_content:
+                js['content'] = []
+                for c in self.content:
+                    js['content'].append(c.dump())
+            return js
+
+    class Text(Content):
+
+        def __init__(self, text):
+            super().__init__('text')
+            self.text = str(text)
+
+        def dump(self):
+            js = super().dump()
+            js['text'] = self.text
+            return js
+
+
+    class Paragraph(Content):
+
+        def __init__(self, content=None):
+            super().__init__('paragraph')
+            self.convert_strings = True
+            if content is not None:
+                self.add_content(content)
+
+    class Heading(Content):
+
+        def __init__(self, level, text):
+            super().__init__('heading')
+            self.convert_strings = True
+            try:
+                level = int(level)
+            except:
+                _log.warn(f"Invalid value '{level}' for heading level!")
+                level = 0
+            self.attrs = dict(level=level)
+            self.add_content(text)
+
+
+    class Date(Content):
+
+        def __init__(self, d):
+            super().__init__('date')
+            self.set_date(d)
+
+        def set_date(self, d):
+            if isinstance(d, str):
+                timestamp = int(datetime.fromisoformat(d).timestamp())
+            elif isinstance(d, int):
+                timestamp = d
+            elif isinstance(d, float):
+                timestamp = int(d)
+            elif isinstance(datetime, d):
+                timestamp = int(d.timestamp())
+            elif isinstance(date, d):
+                timestamp = int(datetime(d.day, d.month, d.day).timestamp())
+            else:
+                timestamp = 0
+            self.attrs = dict(timestamp=str(timestamp * 1000))
+
 
 
     class Html(object):
@@ -355,15 +470,15 @@ class Document(object):
 
         def write(self, doc):
             self.write_styles()
-            return self._write(doc, doc.content)
+            return self._write(doc, doc.dump_content())
 
 
     class Plain(object):
 
         def read(self, s):
-            paragraph = dict(type='text', text=str(s))
-            content = [dict(type='paragraph', content=[paragraph])]
-            return Document(content, version=1)
+            doc = Document()
+            doc.add_content(s)
+            return doc
 
 
     class Error(GeneralError):
@@ -379,14 +494,20 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(logging.DEBUG)
     logging.info('Test Atlassian Document Format (ADF) Parser')
 
-    if len(sys.argv) < 2:
-        _log.error('Usage: adf.py FILE')
+    # Parse arguments
+    format = 'adf'
+    if len(sys.argv) == 3:
+        format = sys.argv[1]
+        fname = sys.argv[2]
+    elif len(sys.argv) == 2:
+        fname = sys.argv[1]
+    else:
+        _log.error('Usage: adf.py [FORMAT] FILE')
         exit(1)
-
-    adf_data = open(sys.argv[1]).read()
-
-    doc = Document.read(adf_data)
-    html = doc.write()
-
+    # Read data from file
+    data = open(fname).read()
+    # Parse data
+    doc = Document.read(data, format=format)
+    # Print HTML
     print('=== HTML ===')
-    print(html)
+    print(doc.write(format='html'))
