@@ -186,6 +186,12 @@ class Form(object):
             super().__init__(name, validator)
             self.allow_empty = allow_empty
 
+        def convert(self):
+            if self.value is not None:
+                self.value = self.value.strip()
+            elif self.allow_empty:
+                self.value = ''
+
         def validate(self, **kw):
             if self.value is None or len(self.value) == 0:
                 if self.allow_empty:
