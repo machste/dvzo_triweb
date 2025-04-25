@@ -40,6 +40,7 @@ class Jira(object):
         self.session = session or requests.sessions.Session()
         self.auth = None
         self.cache = None
+        self.read_only = False
 
     def set_auth(self, user, token):
         self.auth = HTTPBasicAuth(user, token)
@@ -77,6 +78,12 @@ class Jira(object):
 
     def _post_or_put_json(self, method, path, data):
         url = self.url + path
+        # Check read only setting
+        if self.read_only:
+            _log.info("Jira is configured as read-only.")
+            _log.debug(f"Data for '{url}': {data}")
+            raise self.Error(f"Das Jira Plug-In hat keine Schreibrechte!")
+        # Prepare Request
         headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -273,6 +280,7 @@ def install_jira(config):
     url = settings.get('jira.url', 'https://atlassian.net')
     user = settings.get('jira.user')
     token = settings.get('jira.token')
+    read_only = settings.get('jira.read_only', False)
     http_session = requests.sessions.Session()
     cache = Cache()
     def jira_factory(request):
@@ -281,5 +289,7 @@ def install_jira(config):
         jira.set_cache(cache)
         if user is not None and token is not None:
             jira.set_auth(user, token)
+        if read_only:
+            jira.read_only = True
         return jira
     config.add_request_method(jira_factory, 'jira', reify=True)
