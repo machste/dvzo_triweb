@@ -50,10 +50,12 @@ class Form(object):
             field.get_from_params(params)
             try:
                 field.do_validation(**kw)
+            except Form.Field.Reset:
+                field.reset()
             except Form.Field.Ignore:
                 field.ignore = True
                 continue
-            except Form.Field.NoValidator:
+            except Form.Field.MissingValidator:
                 yield field
             field.validated = True
             if not field.is_valid():
@@ -139,15 +141,13 @@ class Form(object):
             pass
 
         def validate(self):
-            raise Form.Field.NoValidator()
+            raise Form.Field.MissingValidator()
 
         def do_validation(self, **kw):
             self.convert()
-            if self.validator == False:
-                raise Form.Field.Ignore()
             if self.validator is None:
                 self.validate(*kw)
-            else:
+            elif self.validator != False:
                 try:
                     self.validator(self, **kw)
                 except Form.Field.Error as err:
@@ -165,11 +165,13 @@ class Form(object):
         def __repr__(self):
             return f'({self.name}, {self.value}, {self.err_msg})'
 
-
-        class NoValidator(Exception):
+        class Reset(Exception):
             pass
 
         class Ignore(Exception):
+            pass
+
+        class MissingValidator(Exception):
             pass
 
         class Error(Exception):
@@ -186,17 +188,20 @@ class Form(object):
             super().__init__(name, validator)
             self.allow_empty = allow_empty
 
+        def copy_to(self, model, **kw):
+            val = None if len(self.value) == 0 else self.value
+            setattr(model, self.name, val)
+
         def convert(self):
-            if self.value is not None:
-                self.value = self.value.strip()
-            elif self.allow_empty:
+            if self.value is None:
                 self.value = ''
+            else:
+                self.value = str(self.value).strip()
 
         def validate(self, **kw):
-            if self.value is None or len(self.value) == 0:
-                if self.allow_empty:
-                    raise Form.Field.Ignore()
-                self.err_msg = 'Dieses Feld darf nicht leer sein!'
+            if len(self.value) > 0 or self.allow_empty:
+                return
+            self.err_msg = 'Dieses Feld darf nicht leer sein!'
 
 
     class DateField(Field):
@@ -303,9 +308,6 @@ class Form(object):
                 self.value = int(self.value)
             except:
                 self.err_msg = f'Ungültige Auswahl!'
-
-        def validate(self, **kw):
-            pass
 
 
     class SelectMultiple(SelectId):
