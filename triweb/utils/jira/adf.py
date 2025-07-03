@@ -384,6 +384,14 @@ class Document(object):
             badge_type = color_to_badge_type.get(color, 'secondary')
             self.html += f'<span class="badge text-bg-{badge_type}">{text}</span>\n'
 
+        def write_blockquote(self, doc, attrs, content):
+            self.html += '<div class="ps-3 border-start border-5"><em>\n'
+            self._write(doc, content)
+            self.html += '</em></div>\n'
+
+        def write_hard_break(self, doc, attrs, content):
+            self.html += '<br \>'
+
         def write_element(self, t, doc, attrs, content):
             if t == 'paragraph':
                 self.write_paragraph(doc, attrs, content)
@@ -415,6 +423,10 @@ class Document(object):
                 self.write_panel(doc, attrs, content)
             elif t == 'status':
                 self.write_status(doc, attrs, content)
+            elif t == 'blockquote':
+                self.write_blockquote(doc, attrs, content)
+            elif t == 'hardBreak':
+                self.write_hard_break(doc, attrs, content)
             else:
                 _log.error(f"Unknown element type '{t}'!")
 
