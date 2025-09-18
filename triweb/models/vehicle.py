@@ -21,6 +21,7 @@ class Vehicle(Base):
     given_name = Column(Text)
     short_name = Column(Text)
     state = Column(Text, nullable=False, server_default='unknown')
+    archived = Column(Boolean, nullable=False, server_default='FALSE')
     station = Column(Text)
     track = Column(Text)
     space = Column(Text)

@@ -47,3 +47,6 @@ def includeme(config):
     config.add_route('rest.workday.poll', '/rest/workday/{id}/poll')
     config.add_route('rest.workday.assign', '/rest/workday/{id}/assign')
     config.add_route('rest.workday.state', '/rest/workday/{id}/state')
+    config.add_route('rest.workday.archive', '/rest/workday/{id}/archive')
+    config.add_route('rest.user.archive', '/rest/user/{id}/archive')
+    config.add_route('rest.vehicle.archive', '/rest/vehicle/{id}/archive')

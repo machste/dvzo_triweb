@@ -22,6 +22,7 @@ class Workday(Base):
     description = Column(Text)
     cook = Column(Boolean, nullable=False, server_default='FALSE')
     state = Column(Text, nullable=False, server_default='draft')
+    archived = Column(Boolean, nullable=False, server_default='FALSE')
     # Relations to other tables
     manager = relationship(User)
     user_polls = relationship(WorkdayUserPoll, back_populates='workday')

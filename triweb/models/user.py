@@ -1,5 +1,5 @@
 import bcrypt
-from sqlalchemy import Column, Integer, Text, DateTime
+from sqlalchemy import Column, Boolean, Integer, Text, DateTime
 
 from triweb.models.meta import Base
 
@@ -15,6 +15,7 @@ class User(Base):
     passwd_hash = Column(Text)
     role = Column(Text, nullable=False, server_default="basic")
     last_login = Column(DateTime)
+    archived = Column(Boolean, nullable=False, server_default='FALSE')
 
     ROLES = {
         'guest': 'Gast',
