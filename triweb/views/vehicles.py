@@ -8,6 +8,7 @@ class Vehicles(Private):
 
     @view_config(route_name='vehicles', renderer='vehicles.jinja2')
     def view(self):
-        vehicles = self.dbsession.query(Vehicle).all()
+        vehicles = self.dbsession.query(Vehicle).\
+            filter(Vehicle.archived == False).all()
         return dict(vehicles=vehicles, states=Vehicle.STATES,
                 types=Vehicle.get_types())
