@@ -16,11 +16,14 @@
             <th scope="col">Teamleiter</th>
             <th scope="col">Triebfahrzeug</th>
             <th scope="col">Rottenküche</th>
+            {% if request.has_permission('lead') %}
+              <th scope="col"></th>
+            {% endif %}
           </tr>
         </thead>
         <tbody>
           {% for workday in workdays %}
-            <tr {% if request.has_permission('manage') or (request.has_permission('lead') and workday.manager_id == request.identity.id) %}onclick="window.location='{{ request.route_url('workday.edit', id=workday.id) }}'"{% endif %}>
+            <tr>
               <td class="text-nowrap"><span convert="to_date">{{ workday.date }}</span></td>
               <td class="text-nowrap">{{ workday.start_time.isoformat(timespec='minutes') }} - {{ workday.end_time.isoformat(timespec='minutes') }}</td>
               <td class="text-nowrap">{{ workday.title }}</td>
@@ -36,6 +39,16 @@
                   <i class="icon icon-cook"></i>
                 {% endif %}
               </td>
+              {% if request.has_permission('lead') %}
+                <td>
+                  {% if request.has_permission('manage') or workday.manager_id == request.identity.id %}
+                    <a class="btn btn-outline-secondary btn-sm" href="{{ request.route_url('workday.edit', id=workday.id) }}"><i class="bi bi-pencil-square"></i></a>
+                  {% endif %}
+                  {% if request.has_permission('administrate') %}
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="show_archive_dialog({{ workday.id }}, '{{ workday.title }}')"><i class="bi bi-trash3"></i></button>
+                  {% endif %}
+                </td>
+              {% endif %}
             </tr>
           {% endfor %}
         </tbody>
@@ -53,12 +66,71 @@
     <a class="btn btn-primary" href="{{ request.route_url('workday.add') }}">Arbeitstag hinzufügen</a>
   {% endif %}
 </div>
+
+<!-- Dialog Arbeitstag Archivieren -->
+<div class="modal fade" id="archive_modal" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Arbeitstag Archivieren</h1>
+        <button type="button" class="btn-close" onclick="hide_archive_dialog()"></button>
+      </div>
+      <div class="modal-body">
+        Möchtest du den Arbeitstag "<span id="workday_title">Unbekannt</span>" wirklich archivieren?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="hide_archive_dialog()">Abbrechen</button>
+        <button type="button" class="btn btn-danger" onclick="archive_workday(this)">Archivieren</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   const date_elements = document.querySelectorAll("span[convert=to_date]");
 
   for (el of date_elements) {
     d = any_to_date(el.innerText);
     el.innerText = to_date_string(d, true);
+  }
+
+  const archive_modal = new bootstrap.Modal("#archive_modal");
+  let selected_workday_id = -1;
+  
+  function show_archive_dialog(workday_id, workday_title) {
+    const title_span = document.getElementById("workday_title");
+    selected_workday_id = workday_id;
+    title_span.innerText = workday_title;
+    archive_modal.show();
+  }
+
+  function hide_archive_dialog() {
+    selected_workday_id = -1;
+    archive_modal.hide();
+  }
+
+  function archive_workday() {
+    if (selected_workday_id < 0) {
+      return;
+    }
+    let url = `/rest/workday/${selected_workday_id}/archive`
+    fetch(url)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`URL: '${url}' is not reachable!`);
+        }
+        response.json()
+          .then(data => {
+            if (data.ok) {
+              console.log('workday archive: ok');
+              document.location.reload();
+            }
+          })
+      })
+      .catch(error => {
+        console.log(`workday archive: ${error}`);
+      })
+    selected_workday_id = -1;
   }
 </script>
 {% endblock content %}

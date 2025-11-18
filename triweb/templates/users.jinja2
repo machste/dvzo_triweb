@@ -15,17 +15,26 @@
             <th scope="col">Funktion</th>
             <th scope="col">E-Mail Adresse</th>
             <th scope="col">Zuletzt angemeldet</th>
+            {% if request.has_permission('administrate') %}
+              <th scope="col"></th>
+            {% endif %}
           </tr>
         </thead>
         <tbody>
           {% for user in users %}
-            <tr {% if request.has_permission('administrate') %}onclick="window.location='{{ request.route_url('user.edit', id=user.id) }}'"{% endif %}>
+            <tr>
               <th scope="row">{{ loop.index }}</th>
               <td class="text-nowrap">{{ user.firstname }}</td>
               <td class="text-nowrap">{{ user.lastname }}</td>
               <td class="text-nowrap">{{ roles.get(user.role, '') }}</td>
               <td>{{ user.email }}</td>
               <td class="text-nowrap"><span convert="to_datetime">{{ user.last_login }}</span></td>
+              <td>
+                {% if request.has_permission('administrate') %}
+                  <a class="btn btn-outline-secondary btn-sm" href="{{ request.route_url('user.edit', id=user.id) }}"><i class="bi bi-pencil-square"></i></a>
+                  <button type="button" class="btn btn-outline-danger btn-sm" onclick="show_archive_dialog({{ user.id }}, '{{ user.display_name }}')"><i class="bi bi-trash3"></i></button>
+                {% endif %}
+              </td>
             </tr>
           {% endfor %}
         </tbody>
@@ -43,12 +52,71 @@
     <a class="btn btn-primary" href="{{ request.route_url('user.add') }}">Benutzer hinzufügen</a>
   {% endif %}
 </div>
+
+<!-- Dialog Benutzer Archivieren -->
+<div class="modal fade" id="archive_modal" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Benutzer Archivieren</h1>
+        <button type="button" class="btn-close" onclick="hide_archive_dialog()"></button>
+      </div>
+      <div class="modal-body">
+        Möchtest du den Benutzer "<span id="user_display_name">Unbekannt</span>" wirklich archivieren?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="hide_archive_dialog()">Abbrechen</button>
+        <button type="button" class="btn btn-danger" onclick="archive_user(this)">Archivieren</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   const dtime_elements = document.querySelectorAll("span[convert=to_datetime]");
 
   for (el of dtime_elements) {
     d = any_to_date(el.innerText);
     el.innerText = to_datetime_string(d);
+  }
+
+  const archive_modal = new bootstrap.Modal("#archive_modal");
+  let selected_user_id = -1;
+  
+  function show_archive_dialog(user_id, user_display_name) {
+    const title_span = document.getElementById("user_display_name");
+    selected_user_id = user_id;
+    title_span.innerText = user_display_name;
+    archive_modal.show();
+  }
+
+  function hide_archive_dialog() {
+    selected_user_id = -1;
+    archive_modal.hide();
+  }
+
+  function archive_user() {
+    if (selected_user_id < 0) {
+      return;
+    }
+    let url = `/rest/user/${selected_user_id}/archive`
+    fetch(url)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`URL: '${url}' is not reachable!`);
+        }
+        response.json()
+          .then(data => {
+            if (data.ok) {
+              console.log('user archive: ok');
+              document.location.reload();
+            }
+          })
+      })
+      .catch(error => {
+        console.log(`user archive: ${error}`);
+      })
+    selected_user_id = -1;
   }
 </script>
 {% endblock content %}
